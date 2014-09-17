@@ -22,13 +22,29 @@
  * I could create a binding in OPENHAB to do this but I'm being lazy :-p
  */
 
+#define DEBUG_PRINT
+
 #include <cstdlib>
+#include <wiringPi.h>	// wiringPi Libary (Used for Simple Threading/gpio access)
 #include <wiringPiI2C.h>
 #include <string.h>
 #include <string>
+#include <iostream>
+#include <sys/stat.h>
+
+#include <sys/signal.h>
+#include <exception>
 
 // main header file
 #include "main.h"
+#include "blink.h"
+#include "listener.h"
+
+// Threading Rebuild Includes
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
 
 using namespace std;
 
@@ -40,9 +56,17 @@ int main(int argc, char** argv) {
 	// Set up the signal interrupts
 	signal(SIGINT, SignalHandler); 
 	signal(SIGTERM, SignalHandler);
+	
+	// Set up wiringPI
+	wiringPiSetupSys(); 
+	
+	// Thread the LED blinker
+	std::thread worker_led(worker_thread_blink);
 
 	// Thread the "Listen to bridge" element
 	
+	// Forever loop
+	while(1);
 	return 0;
 }
 
@@ -54,7 +78,7 @@ void SignalHandler(int Reason) {
 	std::cout << "\r\nQuitting: " << Reason << std::endl;
 #endif
 	// TODO Shutdown the LED Flasher thread
-	digitalWrite(LED_RUNNING, LOW);
+	digitalWrite(LED_RUNNING_PIN, LOW);
 	exit(EXIT_SUCCESS);
 }
 
