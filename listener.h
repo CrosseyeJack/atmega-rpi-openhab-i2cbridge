@@ -11,9 +11,8 @@
 #ifndef LISTENER_H
 #define	LISTENER_H
 
-void worker_thread_listener() {
-	
-}
+void i2cbridge_interrupt(void);
+void worker_thread_listener();
 
 #endif	/* LISTENER_H */
 

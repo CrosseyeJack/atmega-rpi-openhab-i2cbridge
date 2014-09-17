@@ -69,6 +69,8 @@ int main(int argc, char** argv) {
 	std::thread worker_led(worker_thread_blink);
 
 	// Thread the "Listen to bridge" element
+	std::thread worker_listener(worker_thread_listener);
+	
 	
 	// Forever loop
 	// Only you can prevent busy waits...
