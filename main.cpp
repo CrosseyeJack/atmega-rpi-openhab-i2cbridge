@@ -45,6 +45,11 @@
 #include <mutex>
 #include <condition_variable>
 
+static bool running_loop = true;
+std::mutex m;
+std::condition_variable cv;
+bool processed = false;
+
 
 using namespace std;
 
@@ -66,7 +71,15 @@ int main(int argc, char** argv) {
 	// Thread the "Listen to bridge" element
 	
 	// Forever loop
-	while(1);
+	// Only you can prevent busy waits...
+	// did have a while(1) here, but that just eats up the CPU. Bad.. Code better.
+	// Using a lock we can keep the "main" thread running until we call it from else where
+	// and not spend all the cpu res on checking if 1=1
+	while (running_loop) { 	
+	// wait for a trigger
+		std::unique_lock<std::mutex> lk(m);
+		cv.wait(lk, []{return processed;});
+	}
 	return 0;
 }
 
