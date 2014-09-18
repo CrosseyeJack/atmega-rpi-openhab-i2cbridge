@@ -13,12 +13,20 @@ bool got_interrupt = false;
 uint8_t ic2data[255];
 
 #define INT_I2CBRIDGE 17		// Pin for the i2cbridge interrupt
+#define RST_I2CBRIDGE 27		// GPIO to reset the micro
 
 // std::mutex m;
 std::mutex mListener;
 std::condition_variable cvListener;
 
 void worker_thread_listener() {
+	// Reset the micro
+	digitalWrite(RST_I2CBRIDGE, LOW);	// Send the Reset pin of the micro low
+	delay(1);							/* 1ms should be good enough
+										 * the datasheet says reset should be a
+										 * min of 2.5µs on reset (0.0025ms) */
+	digitalWrite(RST_I2CBRIDGE,HIGH);	// Send the Reset pin of the micro high
+	
 	// Setup the interrupt for the i2cbridge
 	wiringPiISR(INT_I2CBRIDGE, INT_EDGE_RISING, &i2cbridge_interrupt);
 	
