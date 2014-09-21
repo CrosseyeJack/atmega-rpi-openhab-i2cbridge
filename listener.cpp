@@ -15,6 +15,8 @@ char ic2data[255];
 #define INT_I2CBRIDGE 17		// Pin for the i2cbridge interrupt
 #define RST_I2CBRIDGE 27		// GPIO to reset the micro
 
+#define DEBUG_PRINT
+
 // std::mutex m;
 std::mutex mListener;
 std::condition_variable cvListener;
@@ -50,7 +52,8 @@ void worker_thread_listener() {
 		got_interrupt = false;
 		
 		// Read the i2c data buffer
-		std::cout << "Data:" << std::endl;
+		// Really I could read the value of 0x1F add that value to 0x20 and read
+		// from 0x00 to that value. And I will prob change this to do that later
 		for (int i = 0x00; i <= 0xFF; i++) {
 			ic2data[i] = (char)wiringPiI2CReadReg8(fd,i);
 		}
@@ -58,6 +61,10 @@ void worker_thread_listener() {
 		wiringPiI2CWriteReg8(fd,0xFF,0xFF);
 		
 		// print out the data
+		// Leaving this in for now but its will need to be removed for the daemon
+		// infact why not just surround this with a ifdef?
+#ifdef DEBUG_PRINT
+		std::cout << "Data:" << std::endl;
 		for (int i = 0; i < 256; i+=16) {
 			for (int i2 = 0; i2 < 16; i2++) {
 				int hex = ic2data[i+i2];
@@ -65,6 +72,7 @@ void worker_thread_listener() {
 			}
 			std::cout << std::endl;
 		}
+#endif
 		
 	}
 }
