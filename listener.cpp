@@ -134,7 +134,7 @@ void worker_thread_listener() {
 #endif
 		// Extract the payload
 		char payload[payload_size];
-		for (int i = 0; i < payload_size; i++) {
+		for (int i = 0; i <= payload_size; i++) {
 			payload[i] = ic2data[i+0x20];
 		}
 		// Due to a bug in the bridge micro (which I need to fix) the first transmission returns 0's
