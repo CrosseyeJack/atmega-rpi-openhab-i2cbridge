@@ -133,7 +133,7 @@ void worker_thread_listener() {
 		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
 #endif
 		// Extract the payload
-		char payload[payload_size+1];
+		char payload[payload_size];
 		for (int i = 0; i < payload_size; i++) {
 			payload[i] = ic2data[i+0x20];
 		}
