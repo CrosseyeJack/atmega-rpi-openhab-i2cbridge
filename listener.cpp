@@ -133,8 +133,8 @@ void worker_thread_listener() {
 		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
 #endif
 		// Extract the payload
-		char payload[payload_size];
-		for (int i = 0; i <= payload_size; i++) {
+		char payload[payload_size+1];
+		for (int i = 0; i < payload_size; i++) {
 			payload[i] = ic2data[i+0x20];
 		}
 		// Due to a bug in the bridge micro (which I need to fix) the first transmission returns 0's
@@ -150,6 +150,8 @@ void worker_thread_listener() {
 		// Printout the payload
 		std::cout << "Payload: "<<payload<<std::endl;
 #endif		
+		// SO at this point I have all the data I need from the micro. I can now pass that on to OpenHab
+		// Time to go and re-read the openHAB API
 	}
 }
 
