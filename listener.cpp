@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>      // std::setfill, std::setw
 #include <curl/curl.h>
+#include <string.h>
 
 bool got_interrupt = false;
 
@@ -163,7 +164,14 @@ void worker_thread_listener() {
 		// I can also use the basic auth built into OpenHAB
 		// For this test I will be "hardcoding" a lot of things but I will just need to filter this data out
 		
+		// I need to handle payload. For now I am just going to strip the first 2 and the last chars from it
+		// I will need to break the payload into its multiple parts which are seperated by ;'s
 		
+		char *temp_test = (char*) malloc(payload_size-4);
+		strncpy(temp_test, payload+3, payload_size-4);
+#ifdef DEBUG_PRINT
+		std::cout<<"TEST_TEMP: <"<<temp_test<<">"<<std::endl;
+#endif
 	}
 }
 
