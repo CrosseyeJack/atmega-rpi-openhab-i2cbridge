@@ -166,12 +166,33 @@ void worker_thread_listener() {
 		
 		// I need to handle payload. For now I am just going to strip the first 2 and the last chars from it
 		// I will need to break the payload into its multiple parts which are seperated by ;'s
+
+		CURL *curl;
+		CURLcode curl_return;
+		struct curl_slist *headers=NULL;
 		
-		char *temp_test = (char*) malloc(payload_size-4);
-		strncpy(temp_test, payload+3, payload_size-4);
+		curl = curl_easy_init();
+		if (!curl) {
+			//Unable to init curl - need to handle this
 #ifdef DEBUG_PRINT
-		std::cout<<"TEST_TEMP: <"<<temp_test<<">"<<std::endl;
+			std::cout<<"Failed to init curl"<<std::endl;
 #endif
+			continue;
+		}
+		headers = curl_slist_append(headers, "Content-Type: text/plain");
+		
+		curl_easy_setopt(curl, CURLOPT_URL, "http://openhab:8080/rest/items/Test_Temp");
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "999.9");
+		curl_return = curl_easy_perform(curl); /* post away! */
+		curl_slist_free_all(headers); /* free the header list */
+		if (curl_return != CURLE_OK) {
+#ifdef DEBUG_PRINT
+			std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
+#endif
+		}
+		curl_easy_cleanup(curl);
+		curl_global_cleanup();
 	}
 }
 
