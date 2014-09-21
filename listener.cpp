@@ -114,7 +114,9 @@ void worker_thread_listener() {
 		// I still need to grab stuff like sender address/LQI/RSSI
 		int payload_size = ic2data[0x1F];
 		// Need to do some sanity checks on the payload size
+#ifdef DEBUG_PRINT
 		std::cout << "Payload Size: " << payload_size << std::endl;
+#endif
 		if (payload_size >= 0xDF) {
 			// payload too large
 #ifdef DEBUG_PRINT
@@ -127,6 +129,12 @@ void worker_thread_listener() {
 		unsigned short rssi = ic2data[def_rssi_low] | (ic2data[def_rssi_high]<<8);
 #ifdef DEBUG_PRINT
 		std::cout << "rssi: " << rssi << std::endl;
+#endif
+		
+		// extract LQI
+		unsigned short lqi = ic2data[def_lqi_low] | (ic2data[def_lqi_high]<<8);
+#ifdef	DEBUG_PRINT
+		std::cout << "lqi: " << lqi << std::endl;
 #endif
 		
 	}
