@@ -152,6 +152,17 @@ void worker_thread_listener() {
 #endif		
 		// SO at this point I have all the data I need from the micro. I can now pass that on to OpenHab
 		// Time to go and re-read the openHAB API
+		
+		// OK so some reading, testing, dicking about, eating, etc i think for adding data to OpenHAB I'm
+		// going to use libcurl to send the rest api calls.
+		// Basically calling somthing like:-
+		// curl -H "Content-Type: text/plain" -d "<DATA>" http://openHABhost:8080/rest/items/<ITEM>
+		// set <DATA> on <ITEM> Seems easy enough
+		// for secuirty I can always bind the API address to localhost only.
+		// I can also use the basic auth built into OpenHAB
+		// For this test I will be "hardcoding" a lot of things but I will just need to filter this data out
+		
+		
 	}
 }
 
