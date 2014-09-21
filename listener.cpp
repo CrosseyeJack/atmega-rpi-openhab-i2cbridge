@@ -142,6 +142,10 @@ void worker_thread_listener() {
 #ifdef DEBUG_PRINT
 		std::cout << "Sender address: " << std::hex << sender_address << std::endl;
 #endif 
+		// extract board address (not sure how I will use this, but might aswell extract it)
+		unsigned short board_address = ic2data[def_board_address_low] | (ic2data[def_board_address_high]<<8);
+		// extract pan address
+		unsigned short pan_address = ic2data[def_pan_address_low] | (ic2data[def_pan_address_high]<<8);
 		
 	}
 }
