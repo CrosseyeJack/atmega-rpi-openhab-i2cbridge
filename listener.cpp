@@ -61,7 +61,7 @@ void worker_thread_listener() {
 		for (int i = 0; i < 256; i+=16) {
 			for (int i2 = 0; i2 < 16; i2++) {
 				int hex = ic2data[i+i2];
-				std::cout << std::hex << "0x" << std::uppercase << std::setw(2) << hex << std::nouppercase << std::dec << " ";
+				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') << std::setw(2) << hex << std::nouppercase << std::dec << " ";
 			}
 			std::cout << std::endl;
 		}
