@@ -132,7 +132,24 @@ void worker_thread_listener() {
 #ifdef DEBUG_PRINT
 		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
 #endif
-		
+		// Extract the payload
+		char payload[payload_size];
+		for (int i = 0; i < payload_size; i++) {
+			payload[i] = ic2data[i+0x20];
+		}
+		// Due to a bug in the bridge micro (which I need to fix) the first transmission returns 0's
+		// check the first 3 byes for 0's and if they are there disguard the payload
+		if (payload[0]==0&&payload[1]==0&&payload[2]==0) {
+			// Invalid payload
+#ifdef DEBUG_PRINT
+			std::cout << "Invalid payload" << std::endl;
+#endif
+			continue;
+		}
+#ifdef DEBUG_PRINT
+		// Printout the payload
+		std::cout << "Payload: "<<payload<<std::endl;
+#endif		
 	}
 }
 
