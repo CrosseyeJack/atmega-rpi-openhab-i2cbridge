@@ -17,6 +17,18 @@ char ic2data[255];
 
 #define DEBUG_PRINT
 
+// Just C+P'ed this from the bridge micro code and slapped def_ at the start
+#define def_pan_address_low     0x10
+#define def_pan_address_high    0x11
+#define def_board_address_low   0x12
+#define def_board_address_high  0x13
+#define def_sender_address_low  0x14
+#define def_sender_address_high 0x15
+#define def_lqi_low             0x16
+#define def_lqi_high            0x17
+#define def_rssi_low            0x18
+#define def_rssi_high           0x19
+
 // std::mutex m;
 std::mutex mListener;
 std::condition_variable cvListener;
@@ -103,6 +115,20 @@ void worker_thread_listener() {
 		int payload_size = ic2data[0x1F];
 		// Need to do some sanity checks on the payload size
 		std::cout << "Payload Size: " << payload_size << std::endl;
+		if (payload_size >= 0xDF) {
+			// payload too large
+#ifdef DEBUG_PRINT
+			std::cout << "Too Large Payload" << std::endl;
+#endif
+			continue;
+		}
+		
+		// extract the RSSI Data
+		unsigned short rssi = ic2data[def_rssi_low] | (ic2data[def_rssi_high]<<8);
+#ifdef DEBUG_PRINT
+		std::cout << "rssi: " << rssi << std::endl;
+#endif
+		
 	}
 }
 
