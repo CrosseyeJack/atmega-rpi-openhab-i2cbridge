@@ -25,7 +25,7 @@
 // Simple thread to flash an LED for a visual confirmation that the application is running.
 void worker_thread_blink() {
 #ifdef DEBUG_PRINT
-	std::cout << "\r\nBlinking..." << std::endl;
+	std::cout << "Blinking..." << std::endl;
 #endif
 	for (;;) {
 		digitalWrite(LED_RUNNING_PIN, HIGH);
