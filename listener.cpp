@@ -10,7 +10,7 @@
 
 bool got_interrupt = false;
 
-uint8_t ic2data[255];
+char ic2data[255];
 
 #define INT_I2CBRIDGE 17		// Pin for the i2cbridge interrupt
 #define RST_I2CBRIDGE 27		// GPIO to reset the micro
@@ -51,18 +51,20 @@ void worker_thread_listener() {
 		
 		// Read the i2c data buffer
 		std::cout << "Data:" << std::endl;
-		for (int i = 0; i <= 255; i++) {
-			ic2data[i] = wiringPiI2CReadReg8(fd,i);
+		for (int i = 0x00; i <= 0xFF; i++) {
+			ic2data[i] = (char)wiringPiI2CReadReg8(fd,i);
 		}
-		
-//		for (int i = 0; i < 256; i+=16) {
-//			for (int i2 = 0; i2 < 16; i2++) {
-//				std::cout << std::hex << "0x" << std::uppercase << std::setw(2) << wiringPiI2CReadReg8(fd,i+i2) << std::nouppercase << std::dec << " ";
-//			}
-//			std::cout << std::endl;
-//		}
-		wiringPiI2CWriteReg8(fd,0xFF,0xFF);
 		// Tell the bridge to flush the data, release both the interrupt and radio
+		wiringPiI2CWriteReg8(fd,0xFF,0xFF);
+		
+		// print out the data
+		for (int i = 0; i < 256; i+=16) {
+			for (int i2 = 0; i2 < 16; i2++) {
+				int hex = ic2data[i+i2];
+				std::cout << std::hex << "0x" << std::uppercase << std::setw(2) << hex << std::nouppercase << std::dec << " ";
+			}
+			std::cout << std::endl;
+		}
 		
 	}
 }
