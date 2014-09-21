@@ -53,7 +53,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-lwiringPi
+LDLIBSOPTIONS=-lwiringPi -lcurl
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

@@ -46,6 +46,7 @@
         <linkerTool>
           <linkerLibItems>
             <linkerLibLibItem>wiringPi</linkerLibLibItem>
+            <linkerLibLibItem>curl</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

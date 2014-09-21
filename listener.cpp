@@ -7,6 +7,7 @@
 #include <wiringPiI2C.h>
 #include <iostream>
 #include <iomanip>      // std::setfill, std::setw
+#include <curl/curl.h>
 
 bool got_interrupt = false;
 
