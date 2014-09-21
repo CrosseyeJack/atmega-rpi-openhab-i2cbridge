@@ -82,7 +82,7 @@ void worker_thread_listener() {
 		// 0xDE 0xAD 0xBE 0xEF 0x42 0x48 0x48 0x47 0x54 0x54 0x47 0x42 0xDE 0xAD 0xBE 0xEF
 		// The expected header from the i2c bridge micro
 		int headercheck[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0x42, 0x48, 0x48, 0x47,
-			0x54, 0x54, 0x47, 0x42, 0xDE, 0xAD, 0xBE, 0xEE};
+			0x54, 0x54, 0x47, 0x42, 0xDE, 0xAD, 0xBE, 0xEF};
 		bool headcheck = true;
 		for (int i = 0; i < 16; i++) {
 			// Copy out the header
@@ -98,6 +98,11 @@ void worker_thread_listener() {
 #ifdef DEBUG_PRINT
 		std::cout << "Header check passed" << std::endl;
 #endif
+		// Get the payload size
+		// I still need to grab stuff like sender address/LQI/RSSI
+		int payload_size = ic2data[0x1F];
+		// Need to do some sanity checks on the payload size
+		std::cout << "Payload Size: " << payload_size << std::endl;
 	}
 }
 
