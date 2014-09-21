@@ -24,7 +24,7 @@ std::condition_variable cvListener;
 void worker_thread_listener() {
 	// Reset the micro
 #ifdef DEBUG_PRINT
-	std::cout << "Reseting Micro..." << std:endl;
+	std::cout << "Reseting Micro..." << std::endl;
 #endif
 	digitalWrite(RST_I2CBRIDGE, LOW);	// Send the Reset pin of the micro low
 	delay(1);							/* 1ms should be good enough
