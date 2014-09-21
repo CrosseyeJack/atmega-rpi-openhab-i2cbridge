@@ -111,7 +111,7 @@ static void daemonise(void) {
 	}
 	/* If we got a good PID, then we can exit the parent process. */
 	if (pid > 0) {
-		std::cout << "Forked into the background. (" << pid << ")" << std::endl;
+			std::cout << "Forked into the background. (" << pid << ")" << std::endl;
 		exit(EXIT_SUCCESS);
 	}
 

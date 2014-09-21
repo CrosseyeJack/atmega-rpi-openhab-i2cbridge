@@ -77,6 +77,23 @@ void worker_thread_listener() {
 		}
 #endif
 		
+		// Lets start formating this data
+		
+		// 0xDE 0xAD 0xBE 0xEF 0x42 0x48 0x48 0x47 0x54 0x54 0x47 0x42 0xDE 0xAD 0xBE 0xEF
+		// The expected header from the i2c bridge micro
+		int headercheck[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0x42, 0x48, 0x48, 0x47,
+			0x54, 0x54, 0x47, 0x42, 0xDE, 0xAD, 0xBE, 0xEF};
+		bool headcheck = true;
+		for (int i = 0; i < 16; i++) {
+			// Copy out the header
+			if (ic2data[i]!=headercheck[i]) headcheck = false;
+		}
+		if (!headcheck) {
+			std::cout << "Header Check Failed" << std::endl;
+			// Stop processing data
+		} else {
+			std::cout << "Header check passed" << std::endl;
+		}
 	}
 }
 
