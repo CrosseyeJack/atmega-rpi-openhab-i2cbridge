@@ -107,16 +107,10 @@ void worker_thread_listener() {
 			// Stop processing data - probally need to clean up the vars
 			continue;
 		}
-#ifdef DEBUG_PRINT
-		std::cout << "Header check passed" << std::endl;
-#endif
 		// Get the payload size
 		// I still need to grab stuff like sender address/LQI/RSSI
 		int payload_size = ic2data[0x1F];
 		// Need to do some sanity checks on the payload size
-#ifdef DEBUG_PRINT
-		std::cout << "Payload Size: " << payload_size << std::endl;
-#endif
 		if (payload_size >= 0xDF) {
 			// payload too large
 #ifdef DEBUG_PRINT
@@ -127,25 +121,17 @@ void worker_thread_listener() {
 		
 		// extract the RSSI Data
 		unsigned short rssi = ic2data[def_rssi_low] | (ic2data[def_rssi_high]<<8);
-#ifdef DEBUG_PRINT
-		std::cout << "rssi: " << rssi << std::endl;
-#endif
-		
 		// extract LQI
 		unsigned short lqi = ic2data[def_lqi_low] | (ic2data[def_lqi_high]<<8);
-#ifdef	DEBUG_PRINT
-		std::cout << "lqi: " << lqi << std::endl;
-#endif
-		
 		// extract sender address
 		unsigned short sender_address = ic2data[def_sender_address_low] | (ic2data[def_sender_address_high]<<8);
-#ifdef DEBUG_PRINT
-		std::cout << "Sender address: " << std::hex << sender_address << std::endl;
-#endif 
 		// extract board address (not sure how I will use this, but might aswell extract it)
 		unsigned short board_address = ic2data[def_board_address_low] | (ic2data[def_board_address_high]<<8);
 		// extract pan address
 		unsigned short pan_address = ic2data[def_pan_address_low] | (ic2data[def_pan_address_high]<<8);
+#ifdef DEBUG_PRINT
+		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
+#endif
 		
 	}
 }
