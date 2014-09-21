@@ -137,6 +137,12 @@ void worker_thread_listener() {
 		std::cout << "lqi: " << lqi << std::endl;
 #endif
 		
+		// extract sender address
+		unsigned short sender_address = ic2data[def_sender_address_low] | (ic2data[def_sender_address_high]<<8);
+#ifdef DEBUG_PRINT
+		std::cout << "Sender address: " << sender_address << std::endl;
+#endif
+		
 	}
 }
 
