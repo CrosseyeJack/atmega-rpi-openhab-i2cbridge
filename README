@@ -2,4 +2,9 @@ An appliaction that I plan to use to bridge a ATMega to OpenHAB running on a Ras
 
 Work in progress project.
 
+Having a quick think I think I might just use a "special" prefix for my items for example fmk-<boardid>-<pin>
+So the current hardcoded temp sensor would have an item ID of fmk-6002-A0 
+
+I think I will give it a shot. Might as well.
+
 As this application currently links to the wiringPi project (http://wiringpi.com/) which is covered under the GNU LESSER GENERAL PUBLIC LICENSE Version 3 this WIP is also under the same license.
