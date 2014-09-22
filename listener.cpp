@@ -135,8 +135,8 @@ void worker_thread_listener() {
 		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
 #endif
 		// Extract the payload
-		char payload[payload_size];
-		for (int i = 0; i < payload_size; i++) {
+		char payload[payload_size+1];
+		for (int i = 0; i <= payload_size; i++) {
 			payload[i] = ic2data[i+0x20];
 		}
 		// Due to a bug in the bridge micro (which I need to fix) the first transmission returns 0's
@@ -150,7 +150,7 @@ void worker_thread_listener() {
 		}
 #ifdef DEBUG_PRINT
 		// Printout the payload
-		std::cout << "Payload: "<<payload<<std::endl;
+		std::cout << "Payload: " << payload <<std::endl;
 #endif		
 		// SO at this point I have all the data I need from the micro. I can now pass that on to OpenHab
 		// Time to go and re-read the openHAB API
@@ -166,7 +166,9 @@ void worker_thread_listener() {
 		
 		// I need to handle payload. For now I am just going to strip the first 2 and the last chars from it
 		// I will need to break the payload into its multiple parts which are seperated by ;'s
-
+		char *temp_test = (char*) malloc(payload_size-4);
+		strncpy(temp_test, payload+3, payload_size-4);
+		
 		CURL *curl;
 		CURLcode curl_return;
 		struct curl_slist *headers=NULL;
@@ -183,7 +185,7 @@ void worker_thread_listener() {
 		
 		curl_easy_setopt(curl, CURLOPT_URL, "http://openhab:8080/rest/items/Test_Temp");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "999.9");
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, temp_test);
 		curl_return = curl_easy_perform(curl); /* post away! */
 		curl_slist_free_all(headers); /* free the header list */
 		if (curl_return != CURLE_OK) {
