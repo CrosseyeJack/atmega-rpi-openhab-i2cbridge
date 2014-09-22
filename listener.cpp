@@ -9,6 +9,8 @@
 #include <iomanip>      // std::setfill, std::setw
 #include <curl/curl.h>
 #include <string.h>
+#include <string>
+#include <sstream>
 
 bool got_interrupt = false;
 
@@ -169,10 +171,20 @@ void worker_thread_listener() {
 		char *temp_test = (char*) malloc(payload_size-4);
 		strncpy(temp_test, payload+3, payload_size-4);
 		
+		
+		// Create the REST API String for the item
+		std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
+		std::string pin_id = "A0";	// Hard coding this just for testing atm, need to extract this from the payload
+		std::ostringstream s_item;	// String stream for putting the url together
+		s_item << openhaburl << "fmk_" << std::hex << sender_address << "_" << pin_id;
+		std::string itemurl = s_item.str();
+#ifdef DEBUG_PRINT
+		std::cout << "Item URL: " << itemurl << std::endl;
+#endif
+		
 		CURL *curl;
 		CURLcode curl_return;
 		struct curl_slist *headers=NULL;
-		
 		curl = curl_easy_init();
 		if (!curl) {
 			//Unable to init curl - need to handle this
@@ -182,8 +194,7 @@ void worker_thread_listener() {
 			continue;
 		}
 		headers = curl_slist_append(headers, "Content-Type: text/plain");
-		
-		curl_easy_setopt(curl, CURLOPT_URL, "http://openhab:8080/rest/items/Test_Temp");
+		curl_easy_setopt(curl, CURLOPT_URL, itemurl.c_str());
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, temp_test);
 		curl_return = curl_easy_perform(curl); /* post away! */

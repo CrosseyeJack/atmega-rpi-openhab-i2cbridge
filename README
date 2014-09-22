@@ -3,7 +3,7 @@ An appliaction that I plan to use to bridge a ATMega to OpenHAB running on a Ras
 Work in progress project.
 
 Having a quick think I think I might just use a "special" prefix for my items for example fmk-<boardid>-<pin>
-So the current hardcoded temp sensor would have an item ID of fmk-6002-A0 
+So the current hardcoded temp sensor would have an item ID of fmk_6002_A0 (I can't use hyphons in the url, doh)
 
 I think I will give it a shot. Might as well.
 
