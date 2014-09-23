@@ -156,6 +156,13 @@ void worker_thread_listener() {
 #endif		
 		// SO at this point I have all the data I need from the micro. I can now pass that on to OpenHab
 		// Time to go and re-read the openHAB API
+		// No I don't have all the data I need. I had all the data I needed for the TEST.
+		
+		// I need to split the payload data up.
+		// For the sake for simplisty dump the payload into a string object
+		std::string str_payload = std::string(payload);
+		std::cout << "String object: " << str_payload << std::endl;
+		
 		
 		// OK so some reading, testing, dicking about, eating, etc i think for adding data to OpenHAB I'm
 		// going to use libcurl to send the rest api calls.
