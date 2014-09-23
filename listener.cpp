@@ -172,6 +172,10 @@ void worker_thread_listener() {
 		strncpy(temp_test, payload+3, payload_size-4);
 		
 		
+		// ATM I don't want to submit the WHOLE payload to OpenHAB
+		// So I am cheating and just going to skip over this part with a continue;
+		continue;	
+		
 		// Create the REST API String for the item
 		std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
 		std::string pin_id = "A0";	// Hard coding this just for testing atm, need to extract this from the payload
