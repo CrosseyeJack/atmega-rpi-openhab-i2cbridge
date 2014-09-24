@@ -149,7 +149,7 @@ void worker_thread_listener() {
 		// For the sake for simplisty dump the payload into a string object
 		std::string str_payload = std::string(payload);
 		/* to count how often the terminator char occurs */
-		int count = -0;
+		int count = 0;
 		size_t offset = 0;
 
 		while((offset = str_payload.find(';',offset)) != string::npos) {
@@ -160,8 +160,9 @@ void worker_thread_listener() {
 		// A quick sanity check on count
 		// TODO need to preform more checks and purposely send the program invalid code to catch it out
 		// Otherwise we will get segemntation faults later on in the code.
-		if (count == -1) {
+		if (count == 0) {
 			// count didn't increase
+			printf("\a");
 #ifdef DEBUG_PRINT
 			std::cout << "Error in payload" << std::endl;
 #endif
@@ -198,33 +199,14 @@ void worker_thread_listener() {
 				rest_api_post(sender_address, pin, data);
 			}
 		}
-		
-		
-		// OK so some reading, testing, dicking about, eating, etc i think for adding data to OpenHAB I'm
-		// going to use libcurl to send the rest api calls.
-		// Basically calling somthing like:-
-		// curl -H "Content-Type: text/plain" -d "<DATA>" http://openHABhost:8080/rest/items/<ITEM>
-		// set <DATA> on <ITEM> Seems easy enough
-		// for secuirty I can always bind the API address to localhost only.
-		// I can also use the basic auth built into OpenHAB
-		// For this test I will be "hardcoding" a lot of things but I will just need to filter this data out
-		
-		// I need to handle payload. For now I am just going to strip the first 2 and the last chars from it
-		// I will need to break the payload into its multiple parts which are seperated by ;'s
-//		char *temp_test = (char*) malloc(payload_size-4);
-//		strncpy(temp_test, payload+3, payload_size-4);
-		
-		
-		// ATM I don't want to submit the WHOLE payload to OpenHAB
-		// So I am cheating and just going to skip over this part with a continue;
-		continue;	
-		
-		
+		continue;
 	}
 }
 
 void i2cbridge_interrupt(void) {
+#ifdef DEBUG_PRINT
 	std::cout << "interrupt triggered.." << std::endl;
+#endif
 	got_interrupt = true;
 	cvListener.notify_one();
 }
@@ -232,6 +214,18 @@ void i2cbridge_interrupt(void) {
 // For the moment I have just shoved the rest api code down here.
 // I am going to put it in a function simply because I may need to call it a number of times
 // every time we get a data broadcast.
+
+// OK so some reading, testing, dicking about, eating, etc i think for adding data to OpenHAB I'm
+// going to use libcurl to send the rest api calls.
+// Basically calling somthing like:-
+// curl -H "Content-Type: text/plain" -d "<DATA>" http://openHABhost:8080/rest/items/<ITEM>
+// set <DATA> on <ITEM> Seems easy enough
+// for secuirty I can always bind the API address to localhost only.
+// I can also use the basic auth built into OpenHAB
+// For this test I will be "hardcoding" a lot of things but I will just need to filter this data out
+
+// I need to handle payload. For now I am just going to strip the first 2 and the last chars from it
+// I will need to break the payload into its multiple parts which are seperated by ;'s
 int rest_api_post (short sender_address, string pin_id, string data) {
 // Create the REST API String for the item
 	std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
