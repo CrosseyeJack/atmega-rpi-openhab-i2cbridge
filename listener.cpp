@@ -192,7 +192,7 @@ void worker_thread_listener() {
 				string pin = arr_payload[i].substr(0,found);
 				string data = arr_payload[i].substr(found+1, string::npos);
 #ifdef DEBUG_PRINT
-				cout << "arr_payload[" << count << "] left side = " << pin 
+				cout << "arr_payload[" << i << "] left side = " << pin 
 						<< ", right side = " << data << endl;
 #endif
 				// Lets do some sanity checks on the data before handing it off to OpenHAB
