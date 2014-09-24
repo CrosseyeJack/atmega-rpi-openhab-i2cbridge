@@ -195,6 +195,13 @@ void worker_thread_listener() {
 				cout << "arr_payload[" << count << "] left side = " << pin 
 						<< ", right side = " << data << endl;
 #endif
+				// Lets do some sanity checks on the data before handing it off to OpenHAB
+				if(pin.at(0) != 'A' && pin.at(0) != 'D') {
+#ifdef DEBUG_PRINT
+					std::cout << "First char is bad" << std::endl;
+#endif
+					continue;
+				}
 				// Now we have the pin id and the data for that pin, next its time to pass it off to OpenHAB
 				rest_api_post(sender_address, pin, data);
 			}
@@ -256,7 +263,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	if (curl_return != CURLE_OK) {
 #ifdef DEBUG_PRINT
 //		std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
-		//std::cout<<"Something went wrong with curl... "<<std::endl;
+		std::cout<<"Something went wrong with curl... "<<std::endl;
 #endif
 		return 0;
 	}
