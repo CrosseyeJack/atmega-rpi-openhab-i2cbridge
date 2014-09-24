@@ -1,17 +1,5 @@
 #include "listener.h"
 
-#include <stdbool.h>
-#include <mutex>
-#include <condition_variable>
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
-#include <iostream>
-#include <iomanip>      // std::setfill, std::setw
-#include <curl/curl.h>
-#include <string.h>
-#include <string>
-#include <sstream>
-
 bool got_interrupt = false;
 
 char ic2data[255];
@@ -32,6 +20,9 @@ char ic2data[255];
 #define def_lqi_high            0x17
 #define def_rssi_low            0x18
 #define def_rssi_high           0x19
+
+
+using namespace std;
 
 // std::mutex m;
 std::mutex mListener;
@@ -150,10 +141,6 @@ void worker_thread_listener() {
 #endif
 			continue;
 		}
-#ifdef DEBUG_PRINT
-		// Printout the payload
-		std::cout << "Payload: " << payload <<std::endl;
-#endif		
 		// SO at this point I have all the data I need from the micro. I can now pass that on to OpenHab
 		// Time to go and re-read the openHAB API
 		// No I don't have all the data I need. I had all the data I needed for the TEST.
@@ -161,7 +148,53 @@ void worker_thread_listener() {
 		// I need to split the payload data up.
 		// For the sake for simplisty dump the payload into a string object
 		std::string str_payload = std::string(payload);
-		std::cout << "String object: " << str_payload << std::endl;
+		/* to count how often the terminator char occurs */
+		int count = -0;
+		size_t offset = 0;
+
+		while((offset = str_payload.find(';',offset)) != string::npos) {
+			count++;
+			offset++;
+		}
+		
+		// A quick sanity check on count
+		// TODO need to preform more checks and purposely send the program invalid code to catch it out
+		// Otherwise we will get segemntation faults later on in the code.
+		if (count == -1) {
+			// count didn't increase
+#ifdef DEBUG_PRINT
+			std::cout << "Error in payload" << std::endl;
+#endif
+			continue;
+		}
+		
+#ifdef DEBUG_PRINT
+		std::cout << "Payload: " << str_payload 
+				<< " (';' appears in payload " << count << " times)" << std::endl;
+#endif
+		// Create string objects to hold the payload
+		// TODO I should put in a limit on the number of strings that could be created
+		string arr_payload[count];
+		
+		string split_string;
+		stringstream stream(str_payload);
+		count = 0;
+		while( getline(stream, split_string, ';') )
+		{
+			arr_payload[count++] = split_string;
+		}
+		//count = sizeof(arr_payload)/sizeof(arr_payload[0])-1;
+		count = count-1;
+		for (int i=0; i <= count;i++) {
+			size_t found;
+			if ((found = arr_payload[i].find(":")) != string::npos) {
+#ifdef DEBUG_PRINT
+				cout << "arr_payload[" << count << "] left side  = " << arr_payload[i].substr(0,found) << endl;
+				cout << "arr_payload[" << count << "] right side = " << arr_payload[i].substr(found+1, string::npos) << endl;
+#endif
+				// Now we have the pin id and the data for that pin, next its time to pass it off to OpenHAB
+			}
+		}
 		
 		
 		// OK so some reading, testing, dicking about, eating, etc i think for adding data to OpenHAB I'm
@@ -175,48 +208,15 @@ void worker_thread_listener() {
 		
 		// I need to handle payload. For now I am just going to strip the first 2 and the last chars from it
 		// I will need to break the payload into its multiple parts which are seperated by ;'s
-		char *temp_test = (char*) malloc(payload_size-4);
-		strncpy(temp_test, payload+3, payload_size-4);
+//		char *temp_test = (char*) malloc(payload_size-4);
+//		strncpy(temp_test, payload+3, payload_size-4);
 		
 		
 		// ATM I don't want to submit the WHOLE payload to OpenHAB
 		// So I am cheating and just going to skip over this part with a continue;
 		continue;	
 		
-		// Create the REST API String for the item
-		std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
-		std::string pin_id = "A0";	// Hard coding this just for testing atm, need to extract this from the payload
-		std::ostringstream s_item;	// String stream for putting the url together
-		s_item << openhaburl << "fmk_" << std::hex << sender_address << "_" << pin_id;
-		std::string itemurl = s_item.str();
-#ifdef DEBUG_PRINT
-		std::cout << "Item URL: " << itemurl << std::endl;
-#endif
 		
-		CURL *curl;
-		CURLcode curl_return;
-		struct curl_slist *headers=NULL;
-		curl = curl_easy_init();
-		if (!curl) {
-			//Unable to init curl - need to handle this
-#ifdef DEBUG_PRINT
-			std::cout<<"Failed to init curl"<<std::endl;
-#endif
-			continue;
-		}
-		headers = curl_slist_append(headers, "Content-Type: text/plain");
-		curl_easy_setopt(curl, CURLOPT_URL, itemurl.c_str());
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, temp_test);
-		curl_return = curl_easy_perform(curl); /* post away! */
-		curl_slist_free_all(headers); /* free the header list */
-		if (curl_return != CURLE_OK) {
-#ifdef DEBUG_PRINT
-			std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
-#endif
-		}
-		curl_easy_cleanup(curl);
-		curl_global_cleanup();
 	}
 }
 
@@ -224,4 +224,45 @@ void i2cbridge_interrupt(void) {
 	std::cout << "interrupt triggered.." << std::endl;
 	got_interrupt = true;
 	cvListener.notify_one();
+}
+
+// For the moment I have just shoved the rest api code down here.
+// I am going to put it in a function simply because I may need to call it a number of times
+// every time we get a data broadcast.
+int rest_api_post (string sender_address, string pin_id, string data) {
+// Create the REST API String for the item
+	std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
+	std::ostringstream s_item;	// String stream for putting the url together
+	s_item << openhaburl << "fmk_" << std::hex << sender_address << "_" << pin_id;
+	std::string itemurl = s_item.str();
+#ifdef DEBUG_PRINT
+	std::cout << "Item URL: " << itemurl << std::endl;
+#endif
+
+	CURL *curl;
+	CURLcode curl_return;
+	struct curl_slist *headers=NULL;
+	curl = curl_easy_init();
+	if (!curl) {
+		//Unable to init curl - need to handle this
+#ifdef DEBUG_PRINT
+		std::cout<<"Failed to init curl"<<std::endl;
+#endif
+		return 0;
+	}
+	headers = curl_slist_append(headers, "Content-Type: text/plain");
+	curl_easy_setopt(curl, CURLOPT_URL, itemurl.c_str());
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+	curl_return = curl_easy_perform(curl); /* post away! */
+	curl_slist_free_all(headers); /* free the header list */
+	if (curl_return != CURLE_OK) {
+#ifdef DEBUG_PRINT
+		std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
+#endif
+		return 0;
+	}
+	curl_easy_cleanup(curl);
+	curl_global_cleanup();
+	return 1;
 }
