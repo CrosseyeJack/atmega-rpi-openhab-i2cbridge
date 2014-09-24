@@ -188,11 +188,14 @@ void worker_thread_listener() {
 		for (int i=0; i <= count;i++) {
 			size_t found;
 			if ((found = arr_payload[i].find(":")) != string::npos) {
+				string pin = arr_payload[i].substr(0,found);
+				string data = arr_payload[i].substr(found+1, string::npos);
 #ifdef DEBUG_PRINT
-				cout << "arr_payload[" << count << "] left side  = " << arr_payload[i].substr(0,found) << endl;
-				cout << "arr_payload[" << count << "] right side = " << arr_payload[i].substr(found+1, string::npos) << endl;
+				cout << "arr_payload[" << count << "] left side = " << pin 
+						<< ", right side = " << data << endl;
 #endif
 				// Now we have the pin id and the data for that pin, next its time to pass it off to OpenHAB
+				rest_api_post(sender_address, pin, data);
 			}
 		}
 		
@@ -229,7 +232,7 @@ void i2cbridge_interrupt(void) {
 // For the moment I have just shoved the rest api code down here.
 // I am going to put it in a function simply because I may need to call it a number of times
 // every time we get a data broadcast.
-int rest_api_post (string sender_address, string pin_id, string data) {
+int rest_api_post (short sender_address, string pin_id, string data) {
 // Create the REST API String for the item
 	std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
 	std::ostringstream s_item;	// String stream for putting the url together
@@ -258,7 +261,8 @@ int rest_api_post (string sender_address, string pin_id, string data) {
 	curl_slist_free_all(headers); /* free the header list */
 	if (curl_return != CURLE_OK) {
 #ifdef DEBUG_PRINT
-		std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
+//		std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
+		//std::cout<<"Something went wrong with curl... "<<std::endl;
 #endif
 		return 0;
 	}

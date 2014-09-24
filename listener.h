@@ -27,7 +27,7 @@ using namespace std;
 
 void i2cbridge_interrupt(void);
 void worker_thread_listener();
-int rest_api_post (string sender_address, string pin_id, string data);
+int rest_api_post(short sender_address, string pin_id, string data);
 
 #endif	/* LISTENER_H */
 
