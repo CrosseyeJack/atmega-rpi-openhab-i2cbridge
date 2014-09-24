@@ -196,6 +196,15 @@ void worker_thread_listener() {
 						<< ", right side = " << data << endl;
 #endif
 				// Lets do some sanity checks on the data before handing it off to OpenHAB
+				// Check pin string's length
+				if (pin.length()!=2 && pin.length()!=3) {
+#ifdef DEBUG_PRINT
+					std::cout << "Pin Data Length is invalid" << std::endl;
+#endif
+					continue;
+				}
+
+				// Check the first char for either A or D
 				if(pin.at(0) != 'A' && pin.at(0) != 'D') {
 #ifdef DEBUG_PRINT
 					std::cout << "First char is bad" << std::endl;
