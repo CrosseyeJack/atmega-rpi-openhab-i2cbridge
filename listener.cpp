@@ -4,24 +4,6 @@ bool got_interrupt = false;
 
 char ic2data[255];
 
-#define INT_I2CBRIDGE 17		// Pin for the i2cbridge interrupt
-#define RST_I2CBRIDGE 27		// GPIO to reset the micro
-
-#define DEBUG_PRINT
-
-// Just C+P'ed this from the bridge micro code and slapped def_ at the start
-#define def_pan_address_low     0x10
-#define def_pan_address_high    0x11
-#define def_board_address_low   0x12
-#define def_board_address_high  0x13
-#define def_sender_address_low  0x14
-#define def_sender_address_high 0x15
-#define def_lqi_low             0x16
-#define def_lqi_high            0x17
-#define def_rssi_low            0x18
-#define def_rssi_high           0x19
-
-
 using namespace std;
 
 // std::mutex m;
