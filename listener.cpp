@@ -50,6 +50,15 @@ void worker_thread_listener() {
 			ic2data[i] = (char)wiringPiI2CReadReg8(fd,i);
 		}
 		// Tell the bridge to flush the data, release both the interrupt and radio
+		
+		// Dam you Shellshock Bash bug. Spent all day patching servers....
+		// TODO check the payload before sending the flush command to the micro.
+		// TODO maybe add a "re-read radio" command to the micro.
+		// before telling the bridge to flush the data I should check the payload.
+		// I'm getting intermittant blank data. ATM the program will just ignore
+		// any incomplete data but as I can get the payload length I should check
+		// check the payload for invalid data before sending the flush commmand to
+		// the micro.
 		wiringPiI2CWriteReg8(fd,0xFF,0xFF);
 		
 		// print out the data
