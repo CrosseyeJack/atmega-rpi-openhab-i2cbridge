@@ -2,7 +2,6 @@
 
 bool got_interrupt = false;
 
-char ic2data[255];
 char payload_data[0xDF];
 
 using namespace std;
@@ -91,6 +90,7 @@ void worker_thread_listener() {
 		int read_attempt = 0;
 		read_i2c:
 		read_attempt++;
+
 		// Wipe the payload_data
 		for (int i=0; i<=0xDF;i++) payload_data[i] = 0xFF;
 
@@ -129,7 +129,8 @@ void worker_thread_listener() {
 				if (payload_data[i+i2]==0x00 && (i+i2)<payload_size) {
 					dataOK = false;
 				}
-				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') << std::setw(2) << hex << std::nouppercase << std::dec << " ";
+				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
+						<< std::setw(2) << hex << std::nouppercase << std::dec << " ";
 			}
 			std::cout << std::endl;
 		}
@@ -163,7 +164,8 @@ void worker_thread_listener() {
 		wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
 
 #ifdef DEBUG_PRINT
-		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
+		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "
+				<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
 #endif
 
 		// SO at this point I have all the data I need from the micro. I can now pass that on to OpenHab
