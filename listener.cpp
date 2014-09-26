@@ -150,6 +150,9 @@ void worker_thread_listener() {
 		unsigned short pan_address = (char)wiringPiI2CReadReg8(fd,def_pan_address_low)
 			| ((char)wiringPiI2CReadReg8(fd,def_pan_address_high)<<8);
 
+		// read out everything from the radio release it
+		wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
+
 #ifdef DEBUG_PRINT
 		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
 #endif
