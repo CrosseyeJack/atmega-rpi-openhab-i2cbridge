@@ -300,8 +300,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	curl_slist_free_all(headers); /* free the header list */
 	if (curl_return != CURLE_OK) {
 #ifdef DEBUG_PRINT
-//		std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
-		std::cout<<"Something went wrong with curl... "<<std::endl;
+		std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
 		printf("\a");
 #endif
 		return 0;
