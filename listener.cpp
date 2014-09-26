@@ -39,9 +39,12 @@ void worker_thread_listener() {
 	}
 
 	// Thread Loop
+#ifdef DEBUG_PRINT
+		std::cout << "Entering thread loop" << std::endl;
+#endif
 	while(1) {
 #ifdef DEBUG_PRINT
-		std::cout << "Entered thread loop, locking." << std::endl;
+		std::cout << "locking thread." << std::endl;
 #endif
 
 		// Lock the loop until we get the interrupt
