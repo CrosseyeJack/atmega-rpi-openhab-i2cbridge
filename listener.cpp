@@ -50,11 +50,11 @@ void worker_thread_listener() {
 		// Header Check
 		// TODO need to refactor headercheck2 to headerchech as the one down 
 		// below doesn't matter any more
-		int headercheck2[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0x42, 0x48, 0x48, 0x47,
+		int headercheck[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0x42, 0x48, 0x48, 0x47,
 			0x54, 0x54, 0x47, 0x42, 0xDE, 0xAD, 0xBE, 0xEF};
 		
 		for (int i=0; i <=15; i++) {
-			if (!(char)wiringPiI2CReadReg8(fd,i)==headercheck2[i]) {
+			if (!(char)wiringPiI2CReadReg8(fd,i)==headercheck[i]) {
 				// Header check. If head doesn't match what is expected.
 #ifdef DEBUG_PRINT
 				std::cout << "Error Reading Header..." << std::endl;
@@ -92,24 +92,6 @@ void worker_thread_listener() {
 		}
 #endif
 		
-		// Lets start formating this data
-		
-		// 0xDE 0xAD 0xBE 0xEF 0x42 0x48 0x48 0x47 0x54 0x54 0x47 0x42 0xDE 0xAD 0xBE 0xEF
-		// The expected header from the i2c bridge micro
-		int headercheck[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0x42, 0x48, 0x48, 0x47,
-			0x54, 0x54, 0x47, 0x42, 0xDE, 0xAD, 0xBE, 0xEF};
-		bool headcheck = true;
-		for (int i = 0; i < 16; i++) {
-			// Copy out the header
-			if (ic2data[i]!=headercheck[i]) headcheck = false;
-		}
-		if (!headcheck) {
-#ifdef DEBUG_PRINT
-			std::cout << "Header Check Failed" << std::endl;
-#endif
-			// Stop processing data - probally need to clean up the vars
-			continue;
-		}
 		// Get the payload size
 		// I still need to grab stuff like sender address/LQI/RSSI
 		int payload_size = ic2data[0x1F];
