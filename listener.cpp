@@ -3,6 +3,7 @@
 bool got_interrupt = false;
 
 char ic2data[255];
+char payload_data[0xDF];
 
 using namespace std;
 
@@ -59,13 +60,60 @@ void worker_thread_listener() {
 #ifdef DEBUG_PRINT
 				std::cout << "Error Reading Header..." << std::endl;
 #endif
+				
+				wiringPiI2CWriteReg8(fd,0xFF,0xFF);
 				continue;
 			}
 		}
 		
-		for (int i = 0x00; i <= 0xFF; i++) {
-			ic2data[i] = (char)wiringPiI2CReadReg8(fd,i);
+		// Get the payload size
+		// I still need to grab stuff like sender address/LQI/RSSI
+//		int payload_size = ic2data[0x1F];
+		int payload_size = (char)wiringPiI2CReadReg8(fd,def_payload_size);
+		// Need to do some sanity checks on the payload size
+		if (payload_size >= 0xDF) {
+			// payload too large
+#ifdef DEBUG_PRINT
+			std::cout << "PayLoad Too Large: " << payload_size << std::endl;
+			printf("\a");
+#endif
+			wiringPiI2CWriteReg8(fd,0xFF,0xFF);
+			continue;
 		}
+		
+		int read_attempt = 0;
+		read_i2c:
+		read_attempt++;
+		// Wipe the payload_data
+		for (int i=0; i<=0xDF;i++) payload_data[i] = 0xFF;
+		
+		// Read out payload
+		bool dataOK = true;
+		for (int i = 0; i <= payload_size; i++) {
+			payload_data[i] = (char)wiringPiI2CReadReg8(fd,i+0x20);
+			if (payload_data[i]==0x00 && i < payload_size) 
+					dataOK = false;
+		}
+		if (!dataOK && read_attempt <= 3) {
+			goto read_i2c;
+		} else if (!dataOK && read_attempt >=3) {
+#ifdef DEBUG_PRINT
+			std::cout << "Bad Read..." << std::endl;
+			printf("\a");
+#endif
+			wiringPiI2CWriteReg8(fd,0xFF,0xFF); // unlock radio
+			continue;
+		}
+		
+#ifdef DEBUG_PRINT
+		// Dump the payload to console
+		std::cout << "Payload:" << std::endl;
+		for (int i = 0; i <= payload_size; i++) {
+			std::cout << payload_data[i];
+		}
+		std::cout << std::endl;
+#endif
+		
 		// Tell the bridge to flush the data, release both the interrupt and radio
 		
 		// Dam you Shellshock Bash bug. Spent all day patching servers....
@@ -83,26 +131,25 @@ void worker_thread_listener() {
 		// infact why not just surround this with a ifdef?
 #ifdef DEBUG_PRINT
 		std::cout << "Data:" << std::endl;
-		for (int i = 0; i < 256; i+=16) {
+		for (int i = 0; i < 0xDF; i+=16) {
 			for (int i2 = 0; i2 < 16; i2++) {
-				int hex = ic2data[i+i2];
+				int hex = payload_data[i+i2];
+				if (payload_data[i+i2]==0x00 && (i+i2)<payload_size) {
+					dataOK = false;
+				}
 				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') << std::setw(2) << hex << std::nouppercase << std::dec << " ";
 			}
 			std::cout << std::endl;
 		}
-#endif
-		
-		// Get the payload size
-		// I still need to grab stuff like sender address/LQI/RSSI
-		int payload_size = ic2data[0x1F];
-		// Need to do some sanity checks on the payload size
-		if (payload_size >= 0xDF) {
-			// payload too large
-#ifdef DEBUG_PRINT
-			std::cout << "Too Large Payload" << std::endl;
-#endif
-			continue;
+		if (!dataOK) {
+			printf("\a");
+			std::cout << "Data is bad... Re-read" << std::endl;
 		}
+#endif
+		wiringPiI2CWriteReg8(fd,0xFF,0xFF);
+		continue;
+		
+
 		
 		// extract the RSSI Data
 		unsigned short rssi = ic2data[def_rssi_low] | (ic2data[def_rssi_high]<<8);

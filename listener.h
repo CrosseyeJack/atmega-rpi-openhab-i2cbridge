@@ -34,6 +34,7 @@
 #define def_lqi_high            0x17
 #define def_rssi_low            0x18
 #define def_rssi_high           0x19
+#define def_payload_size		0x1F
 
 #define INT_I2CBRIDGE 17		// Pin for the i2cbridge interrupt
 #define RST_I2CBRIDGE 27		// GPIO to reset the micro
