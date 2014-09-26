@@ -46,6 +46,23 @@ void worker_thread_listener() {
 		// Read the i2c data buffer
 		// Really I could read the value of 0x1F add that value to 0x20 and read
 		// from 0x00 to that value. And I will prob change this to do that later
+		
+		// Header Check
+		// TODO need to refactor headercheck2 to headerchech as the one down 
+		// below doesn't matter any more
+		int headercheck2[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0x42, 0x48, 0x48, 0x47,
+			0x54, 0x54, 0x47, 0x42, 0xDE, 0xAD, 0xBE, 0xEF};
+		
+		for (int i=0; i <=15; i++) {
+			if (!(char)wiringPiI2CReadReg8(fd,i)==headercheck2[i]) {
+				// Header check. If head doesn't match what is expected.
+#ifdef DEBUG_PRINT
+				std::cout << "Error Reading Header..." << std::endl;
+#endif
+				continue;
+			}
+		}
+		
 		for (int i = 0x00; i <= 0xFF; i++) {
 			ic2data[i] = (char)wiringPiI2CReadReg8(fd,i);
 		}
