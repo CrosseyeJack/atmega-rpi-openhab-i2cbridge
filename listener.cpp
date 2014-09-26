@@ -27,10 +27,15 @@ void worker_thread_listener() {
 	int fd = wiringPiI2CSetup(0x42);
 	if (fd == -1) {
 		//something when wrong with opening the i2c bus
+#ifdef DEBUG_PRINT
 		std::cout << "Something went wrong: " << errno << std::endl;
+		printf("\a");
+#endif
 		return;
 	} else {
+#ifdef DEBUG_PRINT
 		std::cout << "Created i2c fd." << std::endl;
+#endif
 	}
 
 	// Thread Loop
@@ -58,6 +63,7 @@ void worker_thread_listener() {
 				// Header check. If head doesn't match what is expected.
 #ifdef DEBUG_PRINT
 				std::cout << "Error Reading Header..." << std::endl;
+				printf("\a");
 #endif
 				wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
 				continue;	// Jump back to the top of the thread loop
@@ -181,6 +187,7 @@ void worker_thread_listener() {
 			printf("\a");
 #ifdef DEBUG_PRINT
 			std::cout << "Error in payload - no ; found" << std::endl;
+			printf("\a");
 #endif
 			continue;
 		}
@@ -212,6 +219,7 @@ void worker_thread_listener() {
 				if (pin.length()!=2 && pin.length()!=3) {
 #ifdef DEBUG_PRINT
 					std::cout << "Pin Data Length is invalid" << std::endl;
+					printf("\a");
 #endif
 					continue;
 				}
@@ -220,6 +228,7 @@ void worker_thread_listener() {
 				if(pin.at(0) != 'A' && pin.at(0) != 'D') {
 #ifdef DEBUG_PRINT
 					std::cout << "First char is bad" << std::endl;
+					printf("\a");
 #endif
 					continue;
 				}
@@ -227,7 +236,6 @@ void worker_thread_listener() {
 				rest_api_post(sender_address, pin, data);
 			}
 		}
-		continue;
 	}
 }
 
@@ -272,6 +280,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 		//Unable to init curl - need to handle this
 #ifdef DEBUG_PRINT
 		std::cout<<"Failed to init curl"<<std::endl;
+		printf("\a");
 #endif
 		return 0;
 	}
@@ -288,6 +297,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 #ifdef DEBUG_PRINT
 //		std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
 		std::cout<<"Something went wrong with curl... "<<std::endl;
+		printf("\a");
 #endif
 		return 0;
 	}
