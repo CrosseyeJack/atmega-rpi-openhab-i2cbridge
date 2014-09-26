@@ -7,7 +7,6 @@ char payload_data[0xDF];
 
 using namespace std;
 
-// std::mutex m;
 std::mutex mListener;
 std::condition_variable cvListener;
 
@@ -21,10 +20,10 @@ void worker_thread_listener() {
 										 * the datasheet says reset should be a
 										 * min of 2.5µs on reset (0.0025ms) */
 	digitalWrite(RST_I2CBRIDGE,HIGH);	// Send the Reset pin of the micro high
-	
+
 	// Setup the interrupt for the i2cbridge
 	wiringPiISR(INT_I2CBRIDGE, INT_EDGE_RISING, &i2cbridge_interrupt);
-	
+
 	int fd = wiringPiI2CSetup(0x42);
 	if (fd == -1) {
 		//something when wrong with opening the i2c bus
@@ -33,103 +32,93 @@ void worker_thread_listener() {
 	} else {
 		std::cout << "Created i2c fd." << std::endl;
 	}
-	
+
 	// Thread Loop
 	while(1) {
+#ifdef DEBUG_PRINT
 		std::cout << "Entered thread loop, locking." << std::endl;
+#endif
+
 		// Lock the loop until we get the interrupt
 		std::unique_lock<std::mutex> lkListener(mListener);
 		cvListener.wait(lkListener, []{return got_interrupt;});
+
+		// Lock released
+#ifdef DEBUG_PRINT
 		std::cout << "Exited lock." << std::endl;
+#endif
+
 		// reset the interrupt flag
 		got_interrupt = false;
-		
-		// Read the i2c data buffer
-		// Really I could read the value of 0x1F add that value to 0x20 and read
-		// from 0x00 to that value. And I will prob change this to do that later
-		
+
 		// Header Check
-		// TODO need to refactor headercheck2 to headerchech as the one down 
-		// below doesn't matter any more
 		int headercheck[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0x42, 0x48, 0x48, 0x47,
 			0x54, 0x54, 0x47, 0x42, 0xDE, 0xAD, 0xBE, 0xEF};
-		
+
 		for (int i=0; i <=15; i++) {
 			if (!(char)wiringPiI2CReadReg8(fd,i)==headercheck[i]) {
 				// Header check. If head doesn't match what is expected.
 #ifdef DEBUG_PRINT
 				std::cout << "Error Reading Header..." << std::endl;
 #endif
-				
-				wiringPiI2CWriteReg8(fd,0xFF,0xFF);
-				continue;
+				wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
+				continue;	// Jump back to the top of the thread loop
 			}
 		}
-		
+
 		// Get the payload size
-		// I still need to grab stuff like sender address/LQI/RSSI
-//		int payload_size = ic2data[0x1F];
 		int payload_size = (char)wiringPiI2CReadReg8(fd,def_payload_size);
-		// Need to do some sanity checks on the payload size
+
+		// Do a simple sanity check on the payload size
 		if (payload_size >= 0xDF) {
 			// payload too large
 #ifdef DEBUG_PRINT
 			std::cout << "PayLoad Too Large: " << payload_size << std::endl;
 			printf("\a");
 #endif
-			wiringPiI2CWriteReg8(fd,0xFF,0xFF);
-			continue;
+			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
+			continue;	// Jump back to the top of the thread loop
 		}
-		
+
+		// Read out the payload
 		int read_attempt = 0;
 		read_i2c:
 		read_attempt++;
 		// Wipe the payload_data
 		for (int i=0; i<=0xDF;i++) payload_data[i] = 0xFF;
-		
-		// Read out payload
-		bool dataOK = true;
+
+		bool dataOK = true;	// simple Data OK Flag
+		// Read out the payload and put it in a char array
 		for (int i = 0; i <= payload_size; i++) {
 			payload_data[i] = (char)wiringPiI2CReadReg8(fd,i+0x20);
 			if (payload_data[i]==0x00 && i < payload_size) 
 					dataOK = false;
 		}
-		if (!dataOK && read_attempt <= 3) {
+		if (!dataOK && read_attempt <= 3) { // re-read the data buffer
 			goto read_i2c;
-		} else if (!dataOK && read_attempt >=3) {
+		} else if (!dataOK && read_attempt >=3) { // The read failed 3 times
 #ifdef DEBUG_PRINT
 			std::cout << "Bad Read..." << std::endl;
 			printf("\a");
 #endif
-			wiringPiI2CWriteReg8(fd,0xFF,0xFF); // unlock radio
-			continue;
+			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
+			continue;	// Jump back to the top of the thread loop
 		}
-		
+
 #ifdef DEBUG_PRINT
 		// Dump the payload to console
-		std::cout << "Payload:" << std::endl;
+		std::cout << "Payload Size: " << payload_size << " Payload: ";
 		for (int i = 0; i <= payload_size; i++) {
 			std::cout << payload_data[i];
 		}
 		std::cout << std::endl;
 #endif
-		
-		// Tell the bridge to flush the data, release both the interrupt and radio
-		
-		// Dam you Shellshock Bash bug. Spent all day patching servers....
-		// TODO check the payload before sending the flush command to the micro.
-		// TODO maybe add a "re-read radio" command to the micro.
-		// before telling the bridge to flush the data I should check the payload.
-		// I'm getting intermittant blank data. ATM the program will just ignore
-		// any incomplete data but as I can get the payload length I should check
-		// check the payload for invalid data before sending the flush commmand to
-		// the micro.
-		wiringPiI2CWriteReg8(fd,0xFF,0xFF);
-		
+
+
+#ifdef DEBUG_PRINT
 		// print out the data
 		// Leaving this in for now but its will need to be removed for the daemon
 		// infact why not just surround this with a ifdef?
-#ifdef DEBUG_PRINT
 		std::cout << "Data:" << std::endl;
 		for (int i = 0; i < 0xDF; i+=16) {
 			for (int i2 = 0; i2 < 16; i2++) {
@@ -146,24 +135,34 @@ void worker_thread_listener() {
 			std::cout << "Data is bad... Re-read" << std::endl;
 		}
 #endif
-		wiringPiI2CWriteReg8(fd,0xFF,0xFF);
-		continue;
-		
 
-		
 		// extract the RSSI Data
-		unsigned short rssi = ic2data[def_rssi_low] | (ic2data[def_rssi_high]<<8);
+		unsigned short rssi = (char)wiringPiI2CReadReg8(fd,def_rssi_low) 
+			| ((char)wiringPiI2CReadReg8(fd,def_rssi_high)<<8);
+
 		// extract LQI
-		unsigned short lqi = ic2data[def_lqi_low] | (ic2data[def_lqi_high]<<8);
+		unsigned short lqi = (char)wiringPiI2CReadReg8(fd,def_lqi_low)
+			| ((char)wiringPiI2CReadReg8(fd,def_lqi_high)<<8);
+
 		// extract sender address
-		unsigned short sender_address = ic2data[def_sender_address_low] | (ic2data[def_sender_address_high]<<8);
+		unsigned short sender_address = (char)wiringPiI2CReadReg8(fd,def_sender_address_low) 
+			| ((char)wiringPiI2CReadReg8(fd,def_sender_address_high)<<8);
+
 		// extract board address (not sure how I will use this, but might aswell extract it)
-		unsigned short board_address = ic2data[def_board_address_low] | (ic2data[def_board_address_high]<<8);
+		unsigned short board_address = (char)wiringPiI2CReadReg8(fd,def_board_address_low)
+			| ((char)wiringPiI2CReadReg8(fd,def_board_address_high)<<8);
+
 		// extract pan address
-		unsigned short pan_address = ic2data[def_pan_address_low] | (ic2data[def_pan_address_high]<<8);
+		unsigned short pan_address = (char)wiringPiI2CReadReg8(fd,def_pan_address_low)
+			| ((char)wiringPiI2CReadReg8(fd,def_pan_address_high)<<8);
+
 #ifdef DEBUG_PRINT
 		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
 #endif
+		
+		wiringPiI2CWriteReg8(fd,0xFF,0xFF); // unlock radio
+		continue;
+		
 		// Extract the payload
 		char payload[payload_size+1];
 		for (int i = 0; i <= payload_size; i++) {
