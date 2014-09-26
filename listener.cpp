@@ -42,14 +42,12 @@ void worker_thread_listener() {
 		// Lock the loop until we get the interrupt
 		std::unique_lock<std::mutex> lkListener(mListener);
 		cvListener.wait(lkListener, []{return got_interrupt;});
+		got_interrupt = false;	// reset the interrupt flag
 
 		// Lock released
 #ifdef DEBUG_PRINT
 		std::cout << "Exited lock." << std::endl;
 #endif
-
-		// reset the interrupt flag
-		got_interrupt = false;
 
 		// Header Check
 		int headercheck[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0x42, 0x48, 0x48, 0x47,
@@ -278,6 +276,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	curl_easy_setopt(curl, CURLOPT_URL, itemurl.c_str());
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+	curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
 	curl_return = curl_easy_perform(curl); /* post away! */
 	curl_slist_free_all(headers); /* free the header list */
 	if (curl_return != CURLE_OK) {
