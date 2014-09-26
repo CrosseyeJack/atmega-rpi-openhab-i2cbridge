@@ -162,28 +162,14 @@ void worker_thread_listener() {
 		
 		wiringPiI2CWriteReg8(fd,0xFF,0xFF); // unlock radio
 		continue;
-		
-		// Extract the payload
-		char payload[payload_size+1];
-		for (int i = 0; i <= payload_size; i++) {
-			payload[i] = ic2data[i+0x20];
-		}
-		// Due to a bug in the bridge micro (which I need to fix) the first transmission returns 0's
-		// check the first 3 byes for 0's and if they are there disguard the payload
-		if (payload[0]==0&&payload[1]==0&&payload[2]==0) {
-			// Invalid payload
-#ifdef DEBUG_PRINT
-			std::cout << "Invalid payload" << std::endl;
-#endif
-			continue;
-		}
+
 		// SO at this point I have all the data I need from the micro. I can now pass that on to OpenHab
 		// Time to go and re-read the openHAB API
 		// No I don't have all the data I need. I had all the data I needed for the TEST.
-		
+
 		// I need to split the payload data up.
 		// For the sake for simplisty dump the payload into a string object
-		std::string str_payload = std::string(payload);
+		std::string str_payload = std::string(payload_data);
 		/* to count how often the terminator char occurs */
 		int count = 0;
 		size_t offset = 0;
@@ -192,7 +178,7 @@ void worker_thread_listener() {
 			count++;
 			offset++;
 		}
-		
+
 		// A quick sanity check on count
 		// TODO need to preform more checks and purposely send the program invalid code to catch it out
 		// Otherwise we will get segemntation faults later on in the code.
@@ -200,11 +186,11 @@ void worker_thread_listener() {
 			// count didn't increase
 			printf("\a");
 #ifdef DEBUG_PRINT
-			std::cout << "Error in payload" << std::endl;
+			std::cout << "Error in payload - no ; found" << std::endl;
 #endif
 			continue;
 		}
-		
+
 #ifdef DEBUG_PRINT
 		std::cout << "Payload: " << str_payload 
 				<< " (';' appears in payload " << count << " times)" << std::endl;
@@ -212,7 +198,7 @@ void worker_thread_listener() {
 		// Create string objects to hold the payload
 		// TODO I should put in a limit on the number of strings that could be created
 		string arr_payload[count];
-		
+
 		string split_string;
 		stringstream stream(str_payload);
 		count = 0;
