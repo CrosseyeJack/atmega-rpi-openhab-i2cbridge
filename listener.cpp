@@ -51,7 +51,7 @@ void worker_thread_listener() {
 
 		// Lock released
 #ifdef DEBUG_PRINT
-		std::cout << "Exited lock." << std::endl;
+		std::cout << "Lock released." << std::endl;
 #endif
 
 		// Header Check
