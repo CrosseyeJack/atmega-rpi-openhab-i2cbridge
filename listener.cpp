@@ -107,18 +107,14 @@ void worker_thread_listener() {
 
 #ifdef DEBUG_PRINT
 		// Dump the payload to console
+		// Leaving this in for now but its will need to be removed for the daemon
+		// infact why not just surround this with a ifdef?
 		std::cout << "Payload Size: " << payload_size << " Payload: ";
 		for (int i = 0; i <= payload_size; i++) {
 			std::cout << payload_data[i];
 		}
 		std::cout << std::endl;
-#endif
 
-
-#ifdef DEBUG_PRINT
-		// print out the data
-		// Leaving this in for now but its will need to be removed for the daemon
-		// infact why not just surround this with a ifdef?
 		std::cout << "Data:" << std::endl;
 		for (int i = 0; i < 0xDF; i+=16) {
 			for (int i2 = 0; i2 < 16; i2++) {
@@ -159,9 +155,6 @@ void worker_thread_listener() {
 #ifdef DEBUG_PRINT
 		std::cout<<"Sender: "<<std::hex<<sender_address<<std::dec<<" RSSI/LQI: "<<rssi<<"/"<<lqi<<" Payload size: "<<payload_size<<std::endl;
 #endif
-		
-		wiringPiI2CWriteReg8(fd,0xFF,0xFF); // unlock radio
-		continue;
 
 		// SO at this point I have all the data I need from the micro. I can now pass that on to OpenHab
 		// Time to go and re-read the openHAB API
@@ -191,10 +184,6 @@ void worker_thread_listener() {
 			continue;
 		}
 
-#ifdef DEBUG_PRINT
-		std::cout << "Payload: " << str_payload 
-				<< " (';' appears in payload " << count << " times)" << std::endl;
-#endif
 		// Create string objects to hold the payload
 		// TODO I should put in a limit on the number of strings that could be created
 		string arr_payload[count];
