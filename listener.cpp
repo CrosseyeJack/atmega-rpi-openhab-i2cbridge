@@ -108,7 +108,8 @@ void worker_thread_listener() {
 #ifdef DEBUG_PRINT
 			std::cout << "Bad Read... Payload Size: " << payload_size << " Data:" << std::endl;
 			for (int i=0; i<=0xDF; i++) {
-				std::cout << std::hex << (int)payload_data[i] << std::dec << " ";
+				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
+						<< std::setw(2) << (int)payload_data[i] << std::dec << " ";
 			}
 			std::cout << std::endl;
 #endif
