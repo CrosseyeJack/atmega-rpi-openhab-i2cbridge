@@ -294,6 +294,15 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	// Check the data contents
 	// Going to be lose with the data as I might start passing it text.
 	// so just going to do a simple check between 0x32 and 0x7F
+	for (int i=0;i<data.length();i++) {
+		if ((pin_id[i]>=0x32 && pin_id[i]<=0x7f) == false) {
+			// Invalid Data
+#ifdef DEBUG_PRINT
+			std::cout << "Invalid Pin Data" << std::endl;
+#endif
+			return 0;
+		}
+	}
 		
 // Create the REST API String for the item
 	std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
