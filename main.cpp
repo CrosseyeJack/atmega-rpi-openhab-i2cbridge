@@ -60,15 +60,17 @@ using namespace std;
 int main(int argc, char** argv) {
 	
 	// Redirect std::cout to a file
-	std::streambuf *psbuf, *backup;
-	std::ofstream filestr;
-	filestr.open ("i2cbridge.log");
-	backup = std::cout.rdbuf();     // back up cout's streambuf
-	psbuf = filestr.rdbuf();        // get file's streambuf
-	std::cout.rdbuf(psbuf);         // assign streambuf to cout
+	// Disabled Logging to file for bug hunting
+//	std::streambuf *psbuf, *backup;
+//	std::ofstream filestr;
+//	filestr.open ("i2cbridge.log");
+//	backup = std::cout.rdbuf();     // back up cout's streambuf
+//	psbuf = filestr.rdbuf();        // get file's streambuf
+//	std::cout.rdbuf(psbuf);         // assign streambuf to cout
 	
 	// Daemonise the app
-	daemonise();
+	// Temp disabling daemon for bug hunting
+	//daemonise();
 	
 	// Set up the signal interrupts
 	signal(SIGINT, SignalHandler); 
