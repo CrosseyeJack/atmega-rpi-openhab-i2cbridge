@@ -1,10 +1,34 @@
-An appliaction that I plan to use to bridge a ATMega to OpenHAB running on a Raspberry Pi
+An appliaction that I plan to use to bridge a ATMega to OpenHAB running on a 
+Raspberry Pi
 
-Work in progress project.
+A Work in progress project.
 
-Having a quick think I think I might just use a "special" prefix for my items for example fmk-<boardid>-<pin>
-So the current hardcoded temp sensor would have an item ID of fmk_6002_A0 (I can't use hyphons in the url, doh)
+Having a quick think I think I might just use a "special" prefix for my items 
+for example fmk-<boardid>-<pin> So the current hardcoded temp sensor would have
+ an item ID of fmk_6002_A0 (I can't use hyphons in the url, doh)
 
 I think I will give it a shot. Might as well.
 
-As this application currently links to the wiringPi project (http://wiringpi.com/) which is covered under the GNU LESSER GENERAL PUBLIC LICENSE Version 3 this WIP is also under the same license.
+As this application currently links to the wiringPi project 
+(http://wiringpi.com/) which is covered under the GNU LESSER GENERAL PUBLIC 
+LICENSE Version 3 this WIP is also under the same license.
+
+This application makes use of the simpleini library
+https://github.com/brofield/simpleini
+
+The MIT License (MIT)
+Copyright (c) 2006-2013 Brodie Thiesfield
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
