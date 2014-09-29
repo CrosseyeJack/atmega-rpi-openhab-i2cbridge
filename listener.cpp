@@ -98,15 +98,19 @@ void worker_thread_listener() {
 		// Read out the payload and put it in a char array
 		for (int i = 0; i <= payload_size; i++) {
 			payload_data[i] = (char)wiringPiI2CReadReg8(fd,i+0x20);
-			if (payload_data[i]==0x00 && i < payload_size) 
+			if (payload_data[i]==0x00 && i < (payload_size)) 
 					dataOK = false;
 		}
 		if (!dataOK && read_attempt <= 3) { // re-read the data buffer
 			goto read_i2c;
 		} else if (!dataOK && read_attempt >=3) { // The read failed 3 times
+			// FIXME For some reason (which I need to look into) the first read always returns invalid data
 #ifdef DEBUG_PRINT
-			std::cout << "Bad Read..." << std::endl;
-			printf("\a");
+			std::cout << "Bad Read... Payload Size: " << payload_size << " Data:" << std::endl;
+			for (int i=0; i<=0xDF; i++) {
+				std::cout << std::hex << (int)payload_data[i] << std::dec << " ";
+			}
+			std::cout << std::endl;
 #endif
 			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
 			continue;	// Jump back to the top of the thread loop
@@ -126,7 +130,7 @@ void worker_thread_listener() {
 		for (int i = 0; i < 0xDF; i+=16) {
 			for (int i2 = 0; i2 < 16; i2++) {
 				int hex = payload_data[i+i2];
-				if (payload_data[i+i2]==0x00 && (i+i2)<payload_size) {
+				if (payload_data[i+i2]==0x00 && (i+i2)<(payload_size)) {
 					dataOK = false;
 				}
 				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
