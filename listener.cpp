@@ -80,7 +80,6 @@ void worker_thread_listener() {
 			// payload too large
 #ifdef DEBUG_PRINT
 			std::cout << "PayLoad Too Large: " << payload_size << std::endl;
-			printf("\a");
 #endif
 			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
 			continue;	// Jump back to the top of the thread loop
@@ -110,6 +109,7 @@ void worker_thread_listener() {
 			for (int i=0; i<=0xDF; i++) {
 				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
 						<< std::setw(2) << (int)payload_data[i] << std::dec << " ";
+				// TODO I want to copy the format method used to dump the payload to screen here
 			}
 			std::cout << std::endl;
 #endif
@@ -140,7 +140,6 @@ void worker_thread_listener() {
 			std::cout << std::endl;
 		}
 		if (!dataOK) {
-			printf("\a");
 			std::cout << "Data is bad... Re-read" << std::endl;
 		}
 #endif
@@ -194,7 +193,6 @@ void worker_thread_listener() {
 		// Otherwise we will get segemntation faults later on in the code.
 		if (count == 0) {
 			// count didn't increase
-			printf("\a");
 #ifdef DEBUG_PRINT
 			std::cout << "Error in payload - no ; found" << std::endl;
 			printf("\a");
@@ -225,15 +223,6 @@ void worker_thread_listener() {
 						<< ", right side = " << data << endl;
 #endif
 				// Lets do some sanity checks on the data before handing it off to OpenHAB
-				// Check pin string's length
-				// I might move these checks to the rest_api_post function
-				if (pin.length()!=2 && pin.length()!=3) {
-#ifdef DEBUG_PRINT
-					std::cout << "Pin Data Length is invalid" << std::endl;
-					printf("\a");
-#endif
-					continue;
-				}
 
 				// Check the first char for either A or D
 				if(pin.at(0) != 'A' && pin.at(0) != 'D') {
@@ -305,7 +294,8 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 		}
 	}
 		
-// Create the REST API String for the item
+	// Create the REST API String for the item
+	// Need to move the base url to a config file or something.
 	std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
 	std::ostringstream s_item;	// String stream for putting the url together
 	s_item << openhaburl << "fmk_" << std::hex << sender_address << "_" << pin_id;
