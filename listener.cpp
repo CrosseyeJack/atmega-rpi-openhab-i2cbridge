@@ -1,4 +1,5 @@
 #include "listener.h"
+#include "main.h"
 
 bool got_interrupt = false;
 
@@ -9,7 +10,12 @@ using namespace std;
 std::mutex mListener;
 std::condition_variable cvListener;
 
+string openhabbaseurl;
+
 void worker_thread_listener() {
+	
+	openhabbaseurl = string(ini.GetValue(CONFIG_MAIN,CONFIG_BASEURL,"http://localhost:8080/rest/items/"));
+	
 	// Reset the micro
 #ifdef DEBUG_PRINT
 	std::cout << "Reseting Micro..." << std::endl;
@@ -296,7 +302,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 		
 	// Create the REST API String for the item
 	// Need to move the base url to a config file or something.
-	std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
+	std::string openhaburl = openhabbaseurl;	// Base URL, should put this in a config file
 	std::ostringstream s_item;	// String stream for putting the url together
 	s_item << openhaburl << "fmk_" << std::hex << sender_address << "_" << pin_id;
 	std::string itemurl = s_item.str();

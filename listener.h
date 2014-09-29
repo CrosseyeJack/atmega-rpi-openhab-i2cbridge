@@ -22,6 +22,7 @@
 #include <string.h>
 #include <string>
 #include <sstream>
+#include "../../simpleini/SimpleIni.h"
 
 // Just C+P'ed this from the bridge micro code and slapped def_ at the start
 #define def_pan_address_low     0x10
@@ -47,6 +48,8 @@ using namespace std;
 void i2cbridge_interrupt(void);
 void worker_thread_listener();
 int rest_api_post(short sender_address, string pin_id, string data);
+
+extern CSimpleIniA ini;
 
 #endif	/* LISTENER_H */
 

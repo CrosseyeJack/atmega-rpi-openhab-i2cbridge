@@ -23,7 +23,6 @@
  */
 
 #define DEBUG_PRINT
-#define CONFIG_FILE "i2cbridge.ini"
 
 #include <cstdlib>
 #include <wiringPi.h>	// wiringPi Libary (Used for Simple Threading/gpio access)
@@ -36,7 +35,6 @@
 
 #include <sys/signal.h>
 #include <exception>
-#include "../../simpleini/SimpleIni.h"
 
 // main header file
 #include "main.h"
@@ -52,6 +50,8 @@ static bool running_loop = true;
 std::mutex m;
 std::condition_variable cv;
 bool processed = false;
+
+CSimpleIniA ini;
 
 using namespace std;
 
@@ -74,16 +74,27 @@ int main(int argc, char** argv) {
 	//daemonise();
 	
 	// Load config file
-	CSimpleIniA ini;
 	ini.SetUnicode();
 	
 	SI_Error rc = ini.LoadFile(CONFIG_FILE);
 	if (rc < 0) {
 		// Need to do check why the config file failed to load and see if we can work around it
 		// I.E. Create a blank config file if one doesn't exist.
-		// For Now just quit
+		// For now just try and create the file, though I need to check simpleini error and errno
 		std::cout << "Error loading config file, creating" << std::endl;
+		ini.SetBoolValue(CONFIG_MAIN,CONFIG_DAEMON,false);
 		ini.SaveFile(CONFIG_FILE);
+	}
+	
+	// Check if we should daemonise the application
+	if (ini.GetBoolValue(CONFIG_MAIN,CONFIG_DAEMON,false)) {
+		daemonise();
+		std::streambuf *psbuf, *backup;
+		std::ofstream filestr;
+		filestr.open ("i2cbridge.log");
+		backup = std::cout.rdbuf();     // back up cout's streambuf
+		psbuf = filestr.rdbuf();        // get file's streambuf
+		std::cout.rdbuf(psbuf);         // assign streambuf to cout
 	}
 	
 	// Set up the signal interrupts
@@ -122,6 +133,11 @@ void SignalHandler(int Reason) {
 #endif
 	// TODO Shutdown the LED Flasher thread
 	digitalWrite(LED_RUNNING_PIN, LOW);
+	
+	// Save Config
+	ini.SaveFile(CONFIG_FILE);
+	
+	// Exit the app
 	exit(EXIT_SUCCESS);
 }
 
