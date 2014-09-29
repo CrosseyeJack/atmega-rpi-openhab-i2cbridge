@@ -23,6 +23,7 @@
  */
 
 #define DEBUG_PRINT
+#define CONFIG_FILE "i2cbridge.ini"
 
 #include <cstdlib>
 #include <wiringPi.h>	// wiringPi Libary (Used for Simple Threading/gpio access)
@@ -75,10 +76,14 @@ int main(int argc, char** argv) {
 	// Load config file
 	CSimpleIniA ini;
 	ini.SetUnicode();
-	SI_Error rc = ini.LoadFile("i2cbridge.ini");
+	
+	SI_Error rc = ini.LoadFile(CONFIG_FILE);
 	if (rc < 0) {
-		std::cout << "Error loading config file" << std::endl;
-		return 0;
+		// Need to do check why the config file failed to load and see if we can work around it
+		// I.E. Create a blank config file if one doesn't exist.
+		// For Now just quit
+		std::cout << "Error loading config file, creating" << std::endl;
+		ini.SaveFile(CONFIG_FILE);
 	}
 	
 	// Set up the signal interrupts
