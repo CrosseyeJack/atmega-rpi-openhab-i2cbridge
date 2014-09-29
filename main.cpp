@@ -35,6 +35,7 @@
 
 #include <sys/signal.h>
 #include <exception>
+#include "../../simpleini/SimpleIni.h"
 
 // main header file
 #include "main.h"
@@ -50,7 +51,6 @@ static bool running_loop = true;
 std::mutex m;
 std::condition_variable cv;
 bool processed = false;
-
 
 using namespace std;
 
@@ -71,6 +71,15 @@ int main(int argc, char** argv) {
 	// Daemonise the app
 	// Temp disabling daemon for bug hunting
 	//daemonise();
+	
+	// Load config file
+	CSimpleIniA ini;
+	ini.SetUnicode();
+	SI_Error rc = ini.LoadFile("i2cbridge.ini");
+	if (rc < 0) {
+		std::cout << "Error loading config file" << std::endl;
+		return 0;
+	}
 	
 	// Set up the signal interrupts
 	signal(SIGINT, SignalHandler); 
