@@ -137,7 +137,7 @@ void worker_thread_listener() {
 		for (int i = 0; i < 0xDF; i+=16) {
 			for (int i2 = 0; i2 < 16; i2++) {
 				int hex = payload_data[i+i2];
-				if (payload_data[i+i2]==0x00 && (i+i2)<(payload_size)) {
+				if ((payload_data[i+i2]==0x00 || payload_data[i+i2]==0xFF) && (i+i2)<(payload_size)) {
 					dataOK = false;
 				}
 				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
