@@ -31,6 +31,7 @@
 #include <string>
 #include <iostream>
 #include <sys/stat.h>
+#include <fstream>      // std::ofstream
 
 #include <sys/signal.h>
 #include <exception>
@@ -57,6 +58,17 @@ using namespace std;
  * Program entry point
  */
 int main(int argc, char** argv) {
+	
+	// Redirect std::cout to a file
+	std::streambuf *psbuf, *backup;
+	std::ofstream filestr;
+	filestr.open ("i2cbridge.log");
+	backup = std::cout.rdbuf();     // back up cout's streambuf
+	psbuf = filestr.rdbuf();        // get file's streambuf
+	std::cout.rdbuf(psbuf);         // assign streambuf to cout
+	
+	// Daemonise the app
+	daemonise();
 	
 	// Set up the signal interrupts
 	signal(SIGINT, SignalHandler); 
@@ -133,8 +145,8 @@ static void daemonise(void) {
 	}
 	
 	/* Close out the standard file descriptors */
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
+//	close(STDIN_FILENO);
+//	close(STDOUT_FILENO);
+//	close(STDERR_FILENO);
 	std::cout << "Daemonized the app" << std::endl;
 }
