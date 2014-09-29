@@ -281,11 +281,11 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	}
 	
 	// Check pin id's contents
-	for (int i=0; i<pin_id.length();i++) {
-		if ( ((pin_id[i] >= 0x48 && pin_id[i] <= 0x57) or pin_id[i] == 'A' or pin_id[i] == 'D') == false ) {
+	for (int i=0;i<pin_id.length();i++) {
+		if (((pin_id[i] >= 48 && pin_id[i] <= 57) or (pin_id[i] == 'A') or (pin_id[i] == 'D')) == false ) {
 			// Invalid Pin ID Data
 #ifdef DEBUG_PRINT
-			std::cout << "Invaild Pin ID" << std::endl;
+			std::cout << "Invaild Pin ID: " << std::hex << pin_id[i] << std::dec << " : " << i << std::endl;
 #endif
 			return 0;
 		}
@@ -295,10 +295,10 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	// Going to be lose with the data as I might start passing it text.
 	// so just going to do a simple check between 0x32 and 0x7F
 	for (int i=0;i<data.length();i++) {
-		if ((pin_id[i]>=0x32 && pin_id[i]<=0x7f) == false) {
+		if ((data[i]>=32 && data[i]<=127) == false) {
 			// Invalid Data
 #ifdef DEBUG_PRINT
-			std::cout << "Invalid Pin Data" << std::endl;
+			std::cout << "Invalid Pin Data: " << std::hex << data[i] << std::dec << " : " << i << std::endl;
 #endif
 			return 0;
 		}
