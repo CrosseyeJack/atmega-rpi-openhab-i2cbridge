@@ -321,7 +321,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	curl_easy_setopt(curl, CURLOPT_URL, itemurl.c_str());
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-	curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+//	curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
 	curl_return = curl_easy_perform(curl); /* post away! */
 	curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
 	curl_slist_free_all(headers); /* free the header list */
@@ -332,7 +332,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 #endif
 		return 0;
 	}
-	if (http_code!=200) {
+	if ((http_code>=200 && http_code <= 299)==false) {
 #ifdef DEBUG_PRINT
 		std::cout << "Error: " << http_code << std::endl;
 #endif
