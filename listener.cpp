@@ -225,6 +225,7 @@ void worker_thread_listener() {
 #endif
 				// Lets do some sanity checks on the data before handing it off to OpenHAB
 				// Check pin string's length
+				// I might move these checks to the rest_api_post function
 				if (pin.length()!=2 && pin.length()!=3) {
 #ifdef DEBUG_PRINT
 					std::cout << "Pin Data Length is invalid" << std::endl;
@@ -272,6 +273,24 @@ void i2cbridge_interrupt(void) {
 // I need to handle payload. For now I am just going to strip the first 2 and the last chars from it
 // I will need to break the payload into its multiple parts which are seperated by ;'s
 int rest_api_post (short sender_address, string pin_id, string data) {
+	
+	// Check the pin_id length
+	if (pin_id.length()!=2 && pin_id.length()!=3) {
+		// pin id is not the correct length
+		return 0;
+	}
+	
+	// Check pin id's contents
+	for (int i=0; i<pin_id.length();i++) {
+		if ( ((pin_id[i] >= 48 && pin_id[i] <= 57) or pin_id[i] == 'A' or pin_id[i] == 'D') == false ) {
+			// Invalid Pin ID Data
+#ifdef DEBUG_PRINT
+			std::cout << "Invaild Pin ID" << std::endl;
+#endif
+			return 0;
+		}
+	}
+		
 // Create the REST API String for the item
 	std::string openhaburl = "http://openhab:8080/rest/items/";	// Base URL, should put this in a config file
 	std::ostringstream s_item;	// String stream for putting the url together
