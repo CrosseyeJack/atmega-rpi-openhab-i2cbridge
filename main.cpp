@@ -40,6 +40,7 @@
 #include "main.h"
 #include "blink.h"
 #include "listener.h"
+#include "fifoworker.h"
 
 // Threading Rebuild Includes
 #include <thread>
@@ -110,6 +111,8 @@ int main(int argc, char** argv) {
 	// Thread the "Listen to bridge" element
 	std::thread worker_listener(worker_thread_listener);
 	
+	// Thread the FIFO Worker
+	std::thread worker_fifo(worker_thread_fifo);
 	
 	// Forever loop
 	// Only you can prevent busy waits...

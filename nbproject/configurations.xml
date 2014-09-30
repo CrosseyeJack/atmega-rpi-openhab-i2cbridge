@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>blink.h</itemPath>
+      <itemPath>fifoworker.h</itemPath>
       <itemPath>listener.h</itemPath>
       <itemPath>main.h</itemPath>
     </logicalFolder>
@@ -15,6 +16,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>fifoworker.cpp</itemPath>
       <itemPath>listener.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
@@ -52,6 +54,10 @@
       </compileType>
       <item path="blink.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="fifoworker.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="fifoworker.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="listener.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="listener.h" ex="false" tool="3" flavor2="0">
@@ -83,6 +89,10 @@
         </asmTool>
       </compileType>
       <item path="blink.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="fifoworker.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="fifoworker.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="listener.cpp" ex="false" tool="1" flavor2="0">
       </item>
