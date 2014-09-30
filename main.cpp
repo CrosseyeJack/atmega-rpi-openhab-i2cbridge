@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
 	std::thread worker_listener(worker_thread_listener);
 	
 	// Thread the FIFO Worker
-	std::thread worker_fifo(worker_thread_fifo);
+	// std::thread worker_fifo(worker_thread_fifo);
 	
 	// Forever loop
 	// Only you can prevent busy waits...

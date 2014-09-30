@@ -16,7 +16,7 @@
  */
 
 #define LED_FLASH_LOOP  2000		// Time between the start of each LED flash
-#define LED_FLASH_TIME  200			// Time the LED is on for each flash
+#define LED_FLASH_TIME  1000		// Time the LED is on for each flash
 #define LED_RUNNING_PIN	4			// OUTPUT - 7
 
 #include <wiringPi.h>

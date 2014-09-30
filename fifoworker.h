@@ -10,6 +10,9 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <stdio.h> 
+#include <fcntl.h>
+#include <stdlib.h>
 
 void worker_thread_fifo();
 
