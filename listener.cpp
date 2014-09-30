@@ -147,6 +147,7 @@ void worker_thread_listener() {
 		}
 		if (!dataOK) {
 			std::cout << "Data is bad... Re-read" << std::endl;
+			continue;
 		}
 #endif
 
