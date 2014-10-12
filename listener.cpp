@@ -82,13 +82,15 @@ void worker_thread_listener() {
 		int payload_size = (char)wiringPiI2CReadReg8(fd,def_payload_size);
 
 		// Do a simple sanity check on the payload size
-		if (payload_size >= 0xDF) {
+		if (payload_size > 0xDF) {
 			// payload too large
 #ifdef DEBUG_PRINT
 			std::cout << "PayLoad Too Large: " << payload_size << std::endl;
 #endif
-			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
-			continue;	// Jump back to the top of the thread loop
+//			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
+//			continue;	// Jump back to the top of the thread loop
+			// Limit payload size
+			payload_size = 0xDF;
 		}
 
 		// Read out the payload
@@ -112,11 +114,17 @@ void worker_thread_listener() {
 			// FIXME For some reason (which I need to look into) the first read always returns invalid data
 #ifdef DEBUG_PRINT
 			std::cout << "Bad Read... Payload Size: " << payload_size << " Data:" << std::endl;
-			for (int i=0; i<=0xDF; i++) {
-				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
-						<< std::setw(2) << (int)payload_data[i] << std::dec << " ";
-				// TODO I want to copy the format method used to dump the payload to screen here
+			for (int i = 0; i < 0xDF; i+=16) {
+				for (int i2 = 0; i2 < 16; i2++) {
+					std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
+						<< std::setw(2) << (int)payload_data[i+i2] << std::dec << " ";
+				}
 			}
+//			for (int i=0; i<=0xDF; i++) {
+//				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
+//						<< std::setw(2) << (int)payload_data[i] << std::dec << " ";
+//				// TODO I want to copy the format method used to dump the payload to screen here
+//			}
 			std::cout << std::endl;
 #endif
 			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
@@ -147,6 +155,7 @@ void worker_thread_listener() {
 		}
 		if (!dataOK) {
 			std::cout << "Data is bad... Re-read" << std::endl;
+			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
 			continue;
 		}
 #endif
@@ -185,6 +194,9 @@ void worker_thread_listener() {
 
 		// I need to split the payload data up.
 		// For the sake for simplisty dump the payload into a string object
+		
+		// FIXME This is were I am getting segmentation faults.
+		// A Quick Fix was to just jump out if errorous data was encounted eariler in the code
 		std::string str_payload = std::string(payload_data);
 		/* to count how often the terminator char occurs */
 		int count = 0;
@@ -232,7 +244,7 @@ void worker_thread_listener() {
 				// Lets do some sanity checks on the data before handing it off to OpenHAB
 
 				// Check the first char for either A or D
-				if(pin.at(0) != 'A' && pin.at(0) != 'D') {
+				if(pin.at(0) != 'A' && pin.at(0) != 'D' && pin.at(0) != 'P') {
 #ifdef DEBUG_PRINT
 					std::cout << "First char is bad" << std::endl;
 					printf("\a");
@@ -279,7 +291,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	
 	// Check pin id's contents
 	for (int i=0;i<pin_id.length();i++) {
-		if (((pin_id[i] >= 48 && pin_id[i] <= 57) or (pin_id[i] == 'A') or (pin_id[i] == 'D')) == false ) {
+		if (((pin_id[i] >= 48 && pin_id[i] <= 57) or (pin_id[i] == 'A') or (pin_id[i] == 'D') or (pin_id[i] == 'P')) == false ) {
 			// Invalid Pin ID Data
 #ifdef DEBUG_PRINT
 			std::cout << "Invaild Pin ID: " << std::hex << pin_id[i] << std::dec << " : " << i << std::endl;

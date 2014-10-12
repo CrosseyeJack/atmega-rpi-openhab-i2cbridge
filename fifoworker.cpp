@@ -14,6 +14,8 @@ void worker_thread_fifo() {
 		char buf[MAX];
 		int res;
 
+		unlink(FIFO_NAME);
+		
 		if (access(FIFO_NAME, F_OK) == -1) {
 			res = mkfifo(FIFO_NAME, 0777);
 			if (res != 0) {
@@ -24,6 +26,9 @@ void worker_thread_fifo() {
 		}
 
 		//OPEN PIPE WITH READ ONLY
+		// This is file open is blocking. But this is "good" because
+		// we are in a thread and we want to wait until we get data
+		// instead of being busy waiting
 		std::cout << "Opening PIPE" <<std::endl;
 		if ((fd = open (FIFO_NAME, O_RDONLY))<0)
 		{
