@@ -80,17 +80,17 @@ void worker_thread_listener() {
 
 		// Get the payload size
 		int payload_size = (char)wiringPiI2CReadReg8(fd,def_payload_size);
-
 		// Do a simple sanity check on the payload size
 		if (payload_size > 0xDF) {
 			// payload too large
 #ifdef DEBUG_PRINT
 			std::cout << "PayLoad Too Large: " << payload_size << std::endl;
+			printf("\a");
 #endif
-//			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
-//			continue;	// Jump back to the top of the thread loop
+			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
+			continue;	// Jump back to the top of the thread loop
 			// Limit payload size
-			payload_size = 0xDF;
+//			payload_size = 0xDF;
 		}
 
 		// Read out the payload
