@@ -124,6 +124,7 @@ void worker_thread_listener() {
 					std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
 						<< std::setw(2) << (int)payload_data[i+i2] << std::dec << " ";
 				}
+				std::cout << std::endl;
 			}
 //			for (int i=0; i<=0xDF; i++) {
 //				std::cout << std::hex << "0x" << std::uppercase << std::setfill('0') 
