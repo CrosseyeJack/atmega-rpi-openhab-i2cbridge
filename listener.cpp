@@ -105,9 +105,14 @@ void worker_thread_listener() {
 		// Read out the payload and put it in a char array
 		for (int i = 0; i <= payload_size; i++) {
 			payload_data[i] = (char)wiringPiI2CReadReg8(fd,i+0x20);
-			if (payload_data[i]==0x00 && i < (payload_size)) 
+			if (payload_data[i]==0x00 && i < payload_size) 
 					dataOK = false;
 		}
+		
+		if ((char)wiringPiI2CReadReg8(fd,payload_size)!=0x00) {
+			dataOK = false;
+		}
+		
 		if (!dataOK && read_attempt <= 3) { // re-read the data buffer
 			goto read_i2c;
 		} else if (!dataOK && read_attempt >=3) { // The read failed 3 times
