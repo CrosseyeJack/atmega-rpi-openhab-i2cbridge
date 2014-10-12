@@ -109,7 +109,7 @@ void worker_thread_listener() {
 					dataOK = false;
 		}
 		
-		if ((char)wiringPiI2CReadReg8(fd,payload_size)!=0x00) {
+		if ((char)wiringPiI2CReadReg8(fd,payload_size+1)!=0x00) {
 			dataOK = false;
 		}
 		
