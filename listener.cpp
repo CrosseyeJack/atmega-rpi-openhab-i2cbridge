@@ -111,6 +111,13 @@ void worker_thread_listener() {
 			continue;	// Jump back to the top of the thread loop
 			// Limit payload size
 //			payload_size = 0xDF;
+		} else if (payload_size == 0x00) {
+#ifdef DEBUG_PRINT
+			std::cout << "\033[1;31mPayLoad Too Small:\033[0m " << payload_size << std::endl;
+			printf("\a");
+#endif
+			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
+			continue;	// Jump back to the top of the thread loop
 		}
 
 		// Read out the payload
@@ -119,11 +126,11 @@ void worker_thread_listener() {
 		read_attempt++;
 
 		// Wipe the payload_data
-		for (int i=0; i<=0xDF;i++) payload_data[i] = 0xFF;
+		for (int i=0; i<=0xDF;i++) payload_data[i] = 0x00;
 
 		bool dataOK = true;	// simple Data OK Flag
 		// Read out the payload and put it in a char array
-		for (int i = 0; i <= payload_size; i++) {
+		for (int i = 0; i < payload_size; i++) {
 			payload_data[i] = (char)wiringPiI2CReadReg8(fd,i+0x20);
 			if (payload_data[i]==0x00 && i < payload_size) 
 					dataOK = false;
