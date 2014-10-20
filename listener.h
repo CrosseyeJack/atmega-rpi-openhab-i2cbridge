@@ -23,6 +23,7 @@
 #include <string>
 #include <sstream>
 #include "../../simpleini/SimpleIni.h"
+#include <ctime>
 
 // Just C+P'ed this from the bridge micro code and slapped def_ at the start
 #define def_pan_address_low     0x10

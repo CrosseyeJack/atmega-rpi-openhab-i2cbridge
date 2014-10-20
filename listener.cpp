@@ -33,7 +33,7 @@ void worker_thread_listener() {
 	if (fd == -1) {
 		//something when wrong with opening the i2c bus
 #ifdef DEBUG_PRINT
-		std::cout << "Something went wrong: " << errno << std::endl;
+		std::cout << "\033[1;31mSomething went wrong:\033[0m " << errno << std::endl;
 		printf("\a");
 #endif
 		return;
@@ -47,7 +47,27 @@ void worker_thread_listener() {
 #ifdef DEBUG_PRINT
 		std::cout << "Entering thread loop" << std::endl;
 #endif
+		
 	while(1) {
+#ifdef DEBUG_PRINT
+		std::cout << "Loop Start..." << std::endl;
+#endif
+		// Before locking the thread I want to check if the int line is high or low
+		// It should be low. (Though it might be high :-p)
+		if (digitalRead(INT_I2CBRIDGE)) {
+#ifdef DEBUG_PRINT
+			std::cout << "\033[1;31mInterrupt Pin is high (It should be low)\033[0m" << std::endl;
+			printf("\a");
+#endif
+			// Try sending the "We are finished" command the micro
+			// I should also debug the micro
+//			digitalWrite(RST_I2CBRIDGE, LOW);	// Send the Reset pin of the micro low
+//			delay(1);							/* 1ms should be good enough
+//												 * the datasheet says reset should be a
+//												 * min of 2.5µs on reset (0.0025ms) */
+//			digitalWrite(RST_I2CBRIDGE,HIGH);	// Send the Reset pin of the micro high
+		}
+		
 #ifdef DEBUG_PRINT
 		std::cout << "locking thread." << std::endl;
 #endif
@@ -70,7 +90,7 @@ void worker_thread_listener() {
 			if (!(char)wiringPiI2CReadReg8(fd,i)==headercheck[i]) {
 				// Header check. If head doesn't match what is expected.
 #ifdef DEBUG_PRINT
-				std::cout << "Error Reading Header..." << std::endl;
+				std::cout << "\033[1;31mError Reading Header...\033[0m" << std::endl;
 				printf("\a");
 #endif
 				wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
@@ -84,7 +104,7 @@ void worker_thread_listener() {
 		if (payload_size > 0xDF) {
 			// payload too large
 #ifdef DEBUG_PRINT
-			std::cout << "PayLoad Too Large: " << payload_size << std::endl;
+			std::cout << "\033[1;31mPayLoad Too Large:\033[0m " << payload_size << std::endl;
 			printf("\a");
 #endif
 			wiringPiI2CWriteReg8(fd,0xFF,0xFF);	// Release the Radio
@@ -109,8 +129,10 @@ void worker_thread_listener() {
 					dataOK = false;
 		}
 		
-		if ((char)wiringPiI2CReadReg8(fd,payload_size+1)!=0x00) {
+		if (payload_data[payload_size] != 0x00) {
 			dataOK = false;
+			std::cout << "Help... " << std::hex << "0x" << std::uppercase << std::setfill('0') 
+				<< std::setw(2) << (int)payload_data[payload_size] << std::dec << std::endl;
 		}
 		
 		if (!dataOK && read_attempt <= 3) { // re-read the data buffer
@@ -219,7 +241,7 @@ void worker_thread_listener() {
 		if (count == 0) {
 			// count didn't increase
 #ifdef DEBUG_PRINT
-			std::cout << "Error in payload - no ; found" << std::endl;
+			std::cout << "\033[1;31mError in payload - no ; found\033[0m" << std::endl;
 			printf("\a");
 #endif
 			continue;
@@ -252,7 +274,7 @@ void worker_thread_listener() {
 				// Check the first char for either A or D
 				if(pin.at(0) != 'A' && pin.at(0) != 'D' && pin.at(0) != 'P') {
 #ifdef DEBUG_PRINT
-					std::cout << "First char is bad" << std::endl;
+					std::cout << "\033[1;31mFirst char is bad\033[0m" << std::endl;
 					printf("\a");
 #endif
 					continue;
@@ -336,7 +358,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	if (!curl) {
 		//Unable to init curl - need to handle this
 #ifdef DEBUG_PRINT
-		std::cout<<"Failed to init curl"<<std::endl;
+		std::cout<<"\033[1;31mFailed to init curl\033[0m"<<std::endl;
 		printf("\a");
 #endif
 		return 0;
@@ -352,7 +374,7 @@ int rest_api_post (short sender_address, string pin_id, string data) {
 	curl_slist_free_all(headers); /* free the header list */
 	if (curl_return != CURLE_OK) {
 #ifdef DEBUG_PRINT
-		std::cout<<"Something went wrong with curl... "<<curl_easy_strerror(curl_return)<<std::endl;
+		std::cout<<"\033[1;31mSomething went wrong with curl...\033[0m "<<curl_easy_strerror(curl_return)<<std::endl;
 		printf("\a");
 #endif
 		return 0;
